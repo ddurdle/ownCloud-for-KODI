@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strings>
+    <string id="30000">ownCloud</string>
+    <string id="30001">Username</string>
+    <string id="30002">Password</string>
+    <string id="30003">Domain</string>
+	<string id="30004">User Agent</string>
+    <string id="30006">Playback Type</string>
+    <string id="30005">Save Authorization Key</string>
+    <string id="30007">Always Prompt for Quality / Format Playback</string>
+    <string id="30008">Login</string>
+    <string id="30009">Playback</string>
+    <string id="30015">Set the Username and Password in addon settings before running.</string>
+    <string id="30016">You must add org.python.pydev.debug.pysrc to your PYTHONPATH.</string>
+    <string id="30017">Login information is incorrect or permission is denied</string>
+</strings>
