@@ -115,28 +115,18 @@ except :
 # retrieve settings
 username = ADDON.getSetting('username')
 password = ADDON.getSetting('password')
-auth_token = ADDON.getSetting('auth_token')
-auth_cookie = ADDON.getSetting('auth_cookie')
+domain = ADDON.getSetting('domain')
 user_agent = ADDON.getSetting('user_agent')
-save_auth_token = ADDON.getSetting('save_auth_token')
 
 
-# you need to have at least a username&password set or an authorization token
-if ((username == '' or password == '') and auth_token == ''):
+# you need to have at least a username&password set
+if ((username == '' or password == '')):
     xbmcgui.Dialog().ok(ADDON.getLocalizedString(30000), ADDON.getLocalizedString(30015))
     log(ADDON.getLocalizedString(30015), True)
     xbmcplugin.endOfDirectory(plugin_handle)
 
 
-#let's log in
-owncloud = owncloud.owncloud(username, password, auth_token, auth_cookie, user_agent)
-
-# if we don't have an authorization token set for the plugin, set it with the recent login.
-#   auth_token will permit "quicker" login in future executions by reusing the existing login session (less HTTPS calls = quicker video transitions between clips)
-if auth_token == '' and save_auth_token == 'true':
-    ADDON.setSetting('auth_token', owncloud.auth)
-    ADDON.setSetting('auth_cookie', owncloud.cookie)
-
+owncloud = owncloud.owncloud(username, password, domain, user_agent)
 
 
 log('plugin url: ' + plugin_url)
@@ -169,14 +159,6 @@ if mode == 'main' or mode == 'folder':
       addVideo(videos[title]['url'],
                              { 'title' : title , 'plot' : title }, title,
                              img=videos[title]['thumbnail'])
-
-#play a URL that is passed in (presumely requires authorizated session)
-elif mode == 'play':
-    url = plugin_queries['url']
-
-    item = xbmcgui.ListItem(path=url)
-    log('play url: ' + url)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 #play a video given its exact-title
 elif mode == 'playvideo' or mode == 'playVideo':
@@ -222,18 +204,6 @@ elif mode == 'streamURL' or mode == 'streamurl':
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 
-
-#clear the authorization token
-elif mode == 'clearauth':
-    ADDON.setSetting('auth_token', '')
-    ADDON.setSetting('auth_cookie', '')
-
-
-
-# update the authorization token in the configuration file if we had to login for a new one during this execution run
-if auth_token != owncloud.auth and save_auth_token == 'true':
-    ADDON.setSetting('auth_token', owncloud.auth)
-    ADDON.setSetting('auth_cookie', owncloud.cookie)
 
 
 xbmcplugin.endOfDirectory(plugin_handle)

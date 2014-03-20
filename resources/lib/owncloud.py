@@ -21,6 +21,7 @@
 import os
 import re
 import urllib, urllib2
+import cookielib
 
 
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
@@ -45,26 +46,19 @@ def log(msg, err=False):
 class owncloud:
 
 
-    API_VERSION = '3.0'
+    PROTOCOL = 'https://'
     ##
     # initialize (setting 1) username, 2) password, 3) authorization token, 4) user agent string
     ##
-    def __init__(self, user, password, auth, cookie, user_agent):
+    def __init__(self, user, password, domain, user_agent):
         self.user = user
         self.password = password
-        self.auth = auth
-        self.cookie = cookie
         self.user_agent = user_agent
+        self.domain = domain
+        self.cookiejar = cookielib.CookieJar()
 
-        # if we have an authorization token set, try to use it
-        if auth != '':
-          log('using token')
-
-          return
-        else:
-          log('no token - logging in')
-          self.login();
-          return
+#        self.login();
+        return
 
 
     ##
@@ -72,84 +66,57 @@ class owncloud:
     ##
     def login(self):
 
-        header = { 'User-Agent' : self.user_agent}
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        # default User-Agent ('Python-urllib/2.6') will *not* work
+        opener.addheaders = [('User-Agent', self.user_agent)]
 
+        url = self.PROTOCOL + self.domain +'/'
 
-        url = 'http://auth.owncloud.com/'
+        try:
+            response = opener.open(url)
+
+        except urllib2.URLError, e:
+            log(str(e), True)
+            return
+        response_data = response.read()
+        response.close()
+
+        url = self.PROTOCOL + self.domain + '/'
 
         values = {
-                  'pass' : self.password,
+                  'password' : self.password,
                   'user' : self.user,
-                  'remember' : 1,
-                  'json' : 1,
-                  'user_token' : '',
+                  'remember_login' : 1,
+                  'timezone-offset' : -4,
         }
 
         log('logging in')
 
-        req = urllib2.Request(url, urllib.urlencode(values), header)
-
         # try login
         try:
-            response = urllib2.urlopen(req)
+            response = opener.open(url,urllib.urlencode(values))
+
         except urllib2.URLError, e:
             if e.code == 403:
                 #login denied
                 xbmcgui.Dialog().ok(ADDON.getLocalizedString(30000), ADDON.getLocalizedString(30017))
             log(str(e), True)
             return
-        response_header = response.info().getheader('Set-Cookie')
         response_data = response.read()
-
-        authCookie = 0
-        for r in re.finditer(' (auth)\=([^\;]+)\;',
-                             response_header, re.DOTALL):
-            setCookie,authCookie = r.groups()
-
-        if (authCookie != 0):
-            self.cookie = authCookie
-            header = { 'User-Agent' : self.user_agent, 'Cookie' : 'auth='+self.cookie+'; exp=1' }
+        response.close()
 
 
-        statusResult = 0
+        loginResult = 0
         #validate successful login
-        for r in re.finditer('"(status)":(\d+),',
+        for r in re.finditer('(data-user)\=\"([^\"]+)\"',
                              response_data, re.DOTALL):
-            statusType,statusResult = r.groups()
+            loginType,loginResult = r.groups()
 
-        if (statusResult == 0):
+        if (loginResult == 0 or loginResult != self.user):
             xbmcgui.Dialog().ok(ADDON.getLocalizedString(30000), ADDON.getLocalizedString(30017))
             log('login failed', True)
             return
 
-        url = 'http://www.owncloud.com/myfiles'
-
-        req = urllib2.Request(url, None, header)
-
-        # if action fails, validate login
-        try:
-            response = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            log(str(e), True)
-            return
-
-        response_data = response.read()
-
-        userID = 0
-        # retrieve authorization token
-        for r in re.finditer('var_Array\[\'(user_token)\'\]\s+\=\s+\"([^\"]+)\"\;',
-                             response_data, re.DOTALL):
-            id,userID = r.groups()
-
-        if userID == 0 :
-            xbmcgui.Dialog().ok(ADDON.getLocalizedString(30000), ADDON.getLocalizedString(30017))
-            log('login failed', True)
-            return
-
-        log('parameters: %s %s' % (id, userID))
-
-        # save authorization token
-        self.auth = userID
         return
 
 
@@ -177,33 +144,43 @@ class owncloud:
     ##
     def getVideosList(self, folderID=0, cacheType=0):
 
-        # retrieve all documents
-        params = urllib.urlencode({'getFiles': folderID, 'format': 'large', 'term': '', 'group':0, 'limit':1, 'user_token': self.auth, '_': 1394486104901})
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        # default User-Agent ('Python-urllib/2.6') will *not* work
+        opener.addheaders = [('User-Agent', self.user_agent)]
 
-        url = 'http://www.owncloud.com/action/?'+ params
+        url = self.PROTOCOL + self.domain +'/index.php/apps/files'
 
         videos = {}
         if True:
-            log('url = %s header = %s' % (url, self.getHeadersList()))
-            req = urllib2.Request(url, None, self.getHeadersList())
-
             # if action fails, validate login
             try:
-              response = urllib2.urlopen(req)
+              response = opener.open(url)
             except urllib2.URLError, e:
               if e.code == 403 or e.code == 401:
                 self.login()
-                req = urllib2.Request(url, None, self.getHeadersList())
-                try:
-                  response = urllib2.urlopen(req)
-                except urllib2.URLError, e:
-                  log(str(e), True)
-                  return
               else:
                 log(str(e), True)
                 return
-
             response_data = response.read()
+            response.close()
+
+            loginResult = 0
+            #validate successful login
+            for r in re.finditer('(data-user)\=\"([^\"]+)\"',
+                             response_data, re.DOTALL):
+                loginType,loginResult = r.groups()
+
+            if (loginResult == 0 or loginResult != self.user):
+                self.login()
+                try:
+                    response = opener.open(url)
+                    response_data = response.read()
+                    response.close()
+                except urllib2.URLError, e:
+                    log(str(e), True)
+                    return
+
+
 
             # parsing page for videos
             # video-entry
