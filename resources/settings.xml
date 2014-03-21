@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
   	<setting id="domain" type="text" label="30003" default="" />
+  	<setting id="protocol" type="enum" label="30007" values="HTTP|HTTPS" default="0" />
   	<setting id="username" type="text" label="30001" default="" />
 	<setting id="password" type="text" label="30002" option="hidden" default="" />
-  	<setting id="user_agent" type="text" label="30004" default="Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)" />
+  	<setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
+    <setting id="playback_type" type="enum" label="30006" values="Memory Cache|Disk Cache|AJAX" default="2"/>
 </settings>
+

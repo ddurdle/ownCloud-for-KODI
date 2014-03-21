@@ -1,4 +1,7 @@
 Version 0.2.0
 - Public release
+- support music and video
+- tested with ownCloud 6
+- public test servers (https - my.owndrive.com; http - owncloud.arvixe.com)
 Version 0.1.0
 - Initial version

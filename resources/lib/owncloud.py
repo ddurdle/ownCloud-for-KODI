@@ -46,18 +46,27 @@ def log(msg, err=False):
 class owncloud:
 
 
-    PROTOCOL = 'https://'
+    MEDIA_TYPE_MUSIC = 1
+    MEDIA_TYPE_VIDEO = 2
+    MEDIA_TYPE_FOLDER = 0
+
+    CACHE_TYPE_MEMORY = 0
+    CACHE_TYPE_DISK = 1
+    CACHE_TYPE_AJAX = 2
+
     ##
     # initialize (setting 1) username, 2) password, 3) authorization token, 4) user agent string
     ##
-    def __init__(self, user, password, domain, user_agent):
+    def __init__(self, user, password, protocol, domain, auth, session, user_agent):
         self.user = user
         self.password = password
         self.user_agent = user_agent
+        self.protocol = protocol
         self.domain = domain
         self.cookiejar = cookielib.CookieJar()
+        self.auth = auth
+        self.session = session
 
-#        self.login();
         return
 
 
@@ -66,11 +75,14 @@ class owncloud:
     ##
     def login(self):
 
+        self.auth = ''
+        self.session = ''
+
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         # default User-Agent ('Python-urllib/2.6') will *not* work
         opener.addheaders = [('User-Agent', self.user_agent)]
 
-        url = self.PROTOCOL + self.domain +'/'
+        url = self.protocol + self.domain +'/'
 
         try:
             response = opener.open(url)
@@ -81,7 +93,7 @@ class owncloud:
         response_data = response.read()
         response.close()
 
-        url = self.PROTOCOL + self.domain + '/'
+        url = self.protocol + self.domain + '/'
 
         values = {
                   'password' : self.password,
@@ -117,6 +129,16 @@ class owncloud:
             log('login failed', True)
             return
 
+        for cookie in self.cookiejar:
+            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+                        str(cookie), re.DOTALL):
+                cookieType,cookieValue = r.groups()
+                if cookieType == 'oc_token':
+                    self.auth = cookieValue
+                elif cookieType != 'oc_remember_login' and cookieType != 'oc_username':
+                    self.session = cookieType + '=' + cookieValue
+
+
         return
 
 
@@ -125,139 +147,82 @@ class owncloud:
     #   returns: list containing the header
     ##
     def getHeadersList(self):
-        if (self.cookie != '' or self.cookie != 0):
-            return { 'User-Agent' : self.user_agent, 'Cookie' : 'auth='+self.cookie+'; exp=1' }
+        if (self.auth != '' or self.session != 0):
+            return [('User-Agent', self.user_agent), ('Cookie', self.session+'; oc_username='+self.user+'; oc_token='+self.auth+'; oc_remember_login=1')]
         else:
-            return { 'User-Agent' : self.user_agent }
+            return [('User-Agent', self.user_agent )]
 
     ##
     # return the appropriate "headers" for owncloud requests that include 1) user agent, 2) authorization cookie
     #   returns: URL-encoded header string
     ##
     def getHeadersEncoded(self):
-        return urllib.urlencode(self.getHeadersList())
+        if (self.auth != '' or self.session != 0):
+            return urllib.urlencode({ 'User-Agent' : self.user_agent, 'Cookie' : self.session+'; oc_username='+self.user+'; oc_token='+self.auth+'; oc_remember_login=1' })
+        else:
+            return urllib.urlencode({ 'User-Agent' : self.user_agent })
 
     ##
     # retrieve a list of videos, using playback type stream
     #   parameters: prompt for video quality (optional), cache type (optional)
     #   returns: list of videos
     ##
-    def getVideosList(self, folderID=0, cacheType=0):
+    def getVideosList(self, folderName='', cacheType=CACHE_TYPE_MEMORY):
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-        # default User-Agent ('Python-urllib/2.6') will *not* work
-        opener.addheaders = [('User-Agent', self.user_agent)]
+        opener.addheaders = self.getHeadersList()
 
-        url = self.PROTOCOL + self.domain +'/index.php/apps/files'
+        url = self.protocol + self.domain +'/index.php/apps/files?' + urllib.urlencode({'dir' : folderName})
 
-        videos = {}
-        if True:
-            # if action fails, validate login
-            try:
-              response = opener.open(url)
-            except urllib2.URLError, e:
-              if e.code == 403 or e.code == 401:
-                self.login()
-              else:
-                log(str(e), True)
-                return
-            response_data = response.read()
-            response.close()
+        # if action fails, validate login
+        try:
+            response = opener.open(url)
+        except urllib2.URLError, e:
+            log(str(e), True)
+            return
+        response_data = response.read()
+        response.close()
 
-            loginResult = 0
-            #validate successful login
-            for r in re.finditer('(data-user)\=\"([^\"]+)\"',
+        loginResult = 0
+        #validate successful login
+        for r in re.finditer('(data-user)\=\"([^\"]+)\" data-requesttoken="([^\"]+)"',
                              response_data, re.DOTALL):
-                loginType,loginResult = r.groups()
+            loginType,loginResult,requestToken = r.groups()
 
-            if (loginResult == 0 or loginResult != self.user):
-                self.login()
-                try:
-                    response = opener.open(url)
-                    response_data = response.read()
-                    response.close()
-                except urllib2.URLError, e:
-                    log(str(e), True)
-                    return
+        if (loginResult == 0 or loginResult != self.user):
+            self.login()
+            try:
+                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+                opener.addheaders = self.getHeadersList()
+                response = opener.open(url)
+                response_data = response.read()
+                response.close()
+            except urllib2.URLError, e:
+              log(str(e), True)
+              return
+        videos = {}
+        # parsing page for files
+        for r in re.finditer('\<tr data\-id\=.*?</tr>' ,response_data, re.DOTALL):
+            entry = r.group()
+            for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
+                fileID,fileName,contentType,fileType = q.groups()
 
 
+            log('found video %s %s' % (fileID, fileName))
 
-            # parsing page for videos
-            # video-entry
-            for r in re.finditer('"gal_thumb":"([^\"]+)"\,.*?type\=\'video\'.*?"file_filename":"([^\"]+)","al_title":"([^\"]+)".*?alias\=([^\"]+)"' ,response_data, re.DOTALL):
-                img,filename,title,fileID = r.groups()
-                img = re.sub('\\\\', '', img)
-                img = 'http://static.owncloud.com/'+img
+            if fileType == 'video':
+                fileType = self.MEDIA_TYPE_VIDEO
+            elif fileType == 'audio':
+                fileType = self.MEDIA_TYPE_MUSIC
 
-
-                log('found video %s %s' % (title, filename))
-
-                # streaming
-                videos[title] = {'url': 'plugin://plugin.video.owncloud?mode=streamVideo&filename=' + fileID, 'thumbnail' : img}
-
-            for r in re.finditer('"gal_thumb":"([^\"]+)"\,.*?type\=\'audio\'.*?"file_filename":"([^\"]+)","al_title":"([^\"]+)".*?alias\=([^\"]+)"' ,response_data, re.DOTALL):
-                img,filename,title,fileID = r.groups()
-                img = re.sub('\\\\', '', img)
-                img = 'http://static.owncloud.com/'+img
-
-                log('found audio %s %s' % (title, filename))
-
-                # streaming
-                videos[title] = {'url': 'plugin://plugin.video.owncloud?mode=streamVideo&filename=' + fileID, 'thumbnail' : img}
-
-            response.close()
+            if contentType == 'dir':
+                videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + fileName, 'mediaType': self.MEDIA_TYPE_FOLDER}
+            elif cacheType == self.CACHE_TYPE_MEMORY:
+                videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
+            elif cacheType == self.CACHE_TYPE_AJAX:
+                videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
 
         return videos
-
-
-    ##
-    # retrieve a list of folders
-    #   parameters: folder is the current folderID
-    #   returns: list of videos
-    ##
-    def getFolderList(self, folderID=0):
-
-        # retrieve all documents
-        params = urllib.urlencode({'getFolders': folderID, 'format': 'large', 'term': '', 'group':0, 'user_token': self.auth, '_': 1394486104901})
-
-        url = 'http://www.owncloud.com/action/?'+ params
-
-        folders = {}
-        if True:
-            log('url = %s header = %s' % (url, self.getHeadersList()))
-            req = urllib2.Request(url, None, self.getHeadersList())
-
-            # if action fails, validate login
-            try:
-              response = urllib2.urlopen(req)
-            except urllib2.URLError, e:
-              if e.code == 403 or e.code == 401:
-                self.login()
-                req = urllib2.Request(url, None, self.getHeadersList())
-                try:
-                  response = urllib2.urlopen(req)
-                except urllib2.URLError, e:
-                  log(str(e), True)
-                  return
-              else:
-                log(str(e), True)
-                return
-
-            response_data = response.read()
-
-            # parsing page for videos
-            # video-entry
-            for r in re.finditer('"f_id":"([^\"]+)".*?"f_fullname":"([^\"]+)"' ,response_data, re.DOTALL):
-                folderID, folderName = r.groups()
-
-                log('found folder %s %s' % (folderID, folderName))
-
-                # streaming
-                folders[folderName] = 'plugin://plugin.video.owncloud?mode=folder&folderID=' + folderID
-
-            response.close()
-
-        return folders
 
 
 
@@ -268,33 +233,14 @@ class owncloud:
     ##
     def getVideoLink(self,filename,cacheType=0):
 
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        # default User-Agent ('Python-urllib/2.6') will *not* work
+        opener.addheaders = [('User-Agent', self.user_agent)]
 
-        # search by video title
-        params = urllib.urlencode({'file_id': filename, 'group_id': 0, 'page': 1, 'total':7, 'index':0, 'all':'false','user_token': self.auth, '_': 1394486104901})
-        url = 'http://www.owncloud.com/view_media/?'+params
-
-
-        log('url = %s header = %s' % (url, self.getHeadersList()))
-        req = urllib2.Request(url, None, self.getHeadersList())
+        params = urllib.urlencode({'files': filename, 'dir': dir})
+        url = self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params
 
 
-        # if action fails, validate login
-        try:
-            response = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            if e.code == 403 or e.code == 401:
-              self.login()
-              req = urllib2.Request(url, None, self.getHeadersList())
-              try:
-                response = urllib2.urlopen(req)
-              except urllib2.URLError, e:
-                log(str(e), True)
-                return
-            else:
-              log(str(e), True)
-              return
-
-        response_data = response.read()
 
         playbackURL = 0
         # fetch video title, download URL and docid for stream link
@@ -309,83 +255,6 @@ class owncloud:
         response.close()
 
         return playbackURL
-
-
-    ##
-    # retrieve a video link
-    #   parameters: title of video, whether to prompt for quality/format (optional), cache type (optional)
-    #   returns: list of URLs for the video or single URL of video (if not prompting for quality)
-    ##
-    def getPublicLink(self,url,cacheType=0):
-
-
-        log('url = %s header = %s' % (url, self.getHeadersList()))
-        req = urllib2.Request(url, None, self.getHeadersList())
-
-
-        # if action fails, validate login
-        try:
-            response = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            if e.code == 403 or e.code == 401:
-              self.login()
-              req = urllib2.Request(url, None, self.getHeadersList())
-              try:
-                response = urllib2.urlopen(req)
-              except urllib2.URLError, e:
-                log(str(e), True)
-                return
-            else:
-              log(str(e), True)
-              return
-
-        response_data = response.read()
-
-        confirmID = 0
-        # fetch video title, download URL and docid for stream link
-        for r in re.finditer('name\=\"(confirm)\" value\=\"([^\"]+)"\/\>' ,response_data, re.DOTALL):
-             confirmType,confirmID = r.groups()
-
-        response.close()
-
-        if confirmID == 0:
-            return
-
-        values = {
-                  'confirm' : confirmID,
-        }
-
-        req = urllib2.Request(url, urllib.urlencode(values), self.getHeadersList())
-
-
-        # if action fails, validate login
-        try:
-            response = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            if e.code == 403 or e.code == 401:
-              self.login()
-              req = urllib2.Request(url,  urllib.urlencode(values), self.getHeadersList())
-              try:
-                response = urllib2.urlopen(req)
-              except urllib2.URLError, e:
-                log(str(e), True)
-                return
-            else:
-              log(str(e), True)
-              return
-
-        response_data = response.read()
-
-        streamURL = 0
-        # fetch video title, download URL and docid for stream link
-        for r in re.finditer('(file)\: \'([^\']+)' ,response_data, re.DOTALL):
-             streamType,streamURL = r.groups()
-
-
-        response.close()
-
-
-        return streamURL
 
 
 

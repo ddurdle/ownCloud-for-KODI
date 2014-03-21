@@ -59,6 +59,20 @@ def addVideo(url, infolabels, label, img='', fanart='', total_items=0,
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=False, totalItems=total_items)
 
+def addMusic(url, infolabels, label, img='', fanart='', total_items=0,
+                   cm=[], cm_replace=False):
+    infolabels = decode_dict(infolabels)
+    log('adding video: %s - %s' % (infolabels['title'], url))
+    listitem = xbmcgui.ListItem(label, iconImage=img,
+                                thumbnailImage=img)
+    listitem.setInfo('music', infolabels)
+    listitem.setProperty('IsPlayable', 'true')
+    listitem.setProperty('fanart_image', fanart)
+    if cm:
+        listitem.addContextMenuItems(cm, cm_replace)
+    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
+                                isFolder=False, totalItems=total_items)
+
 def addDirectory(url, title, img='', fanart='', total_items=0):
     log('adding dir: %s - %s' % (title, url))
     listitem = xbmcgui.ListItem(decode(title), iconImage=img, thumbnailImage=img)
@@ -116,7 +130,16 @@ except :
 username = ADDON.getSetting('username')
 password = ADDON.getSetting('password')
 domain = ADDON.getSetting('domain')
+protocol = int(ADDON.getSetting('protocol'))
 user_agent = ADDON.getSetting('user_agent')
+auth = ADDON.getSetting('auth')
+session = ADDON.getSetting('session')
+
+
+if protocol == 1:
+    protocol = 'https://'
+else:
+    protocol = 'http://'
 
 
 # you need to have at least a username&password set
@@ -126,7 +149,7 @@ if ((username == '' or password == '')):
     xbmcplugin.endOfDirectory(plugin_handle)
 
 
-owncloud = owncloud.owncloud(username, password, domain, user_agent)
+owncloud = owncloud.owncloud(username, password, protocol, domain, auth, session, user_agent)
 
 
 log('plugin url: ' + plugin_url)
@@ -139,30 +162,26 @@ mode = plugin_queries['mode']
 if mode == 'main' or mode == 'folder':
     log(mode)
 
+    cacheType = int(ADDON.getSetting('playback_type'))
+
     folderID=0
     if (mode == 'folder'):
-        folderID = plugin_queries['folderID']
+        folderName = plugin_queries['directory']
+        videos = owncloud.getVideosList(folderName, cacheType=cacheType)
+    else:
+        videos = owncloud.getVideosList(cacheType=cacheType)
 
-
-
-    cacheType = ADDON.getSetting('playback_type')
-
-    videos = owncloud.getVideosList()
-
-
-    folders = owncloud.getFolderList(folderID)
-    for title in sorted(folders.iterkeys()):
-      addDirectory(folders[title],title)
-
-    videos = owncloud.getVideosList(folderID)
     for title in sorted(videos.iterkeys()):
-      addVideo(videos[title]['url'],
-                             { 'title' : title , 'plot' : title }, title,
-                             img=videos[title]['thumbnail'])
+        if videos[title]['mediaType'] == owncloud.MEDIA_TYPE_FOLDER:
+            addDirectory(videos[title]['url'],title)
+        elif videos[title]['mediaType'] == owncloud.MEDIA_TYPE_VIDEO:
+            addVideo(videos[title]['url'],{ 'title' : title , 'plot' : title }, title)
+        elif videos[title]['mediaType'] == owncloud.MEDIA_TYPE_MUSIC:
+            addMusic(videos[title]['url'],{ 'title' : title , 'plot' : title }, title)
 
 #play a video given its exact-title
-elif mode == 'playvideo' or mode == 'playVideo':
-    title = plugin_queries['title']
+elif mode == 'video':
+    filename = plugin_queries['filename']
     cacheType = ADDON.getSetting('playback_type')
 
     if cacheType == '0':
@@ -177,7 +196,7 @@ elif mode == 'playvideo' or mode == 'playVideo':
 
 
 #force stream - play a video given its exact-title
-elif mode == 'streamVideo' or mode == 'streamvideo':
+elif mode == 'audio':
     try:
       filename = plugin_queries['filename']
     except:
@@ -190,20 +209,12 @@ elif mode == 'streamVideo' or mode == 'streamvideo':
     log('play url: ' + videoURL)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
-elif mode == 'streamURL' or mode == 'streamurl':
-    try:
-      url = plugin_queries['url']
-    except:
-      url = 0
 
+if auth != owncloud.auth:
+    ADDON.setSetting('auth', owncloud.auth)
 
-    # immediately play resulting (is a video)
-    videoURL = owncloud.getPublicLink(url)
-    item = xbmcgui.ListItem(path=videoURL)
-    log('play url: ' + videoURL)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-
-
+if session != owncloud.session:
+    ADDON.setSetting('session', owncloud.session)
 
 
 xbmcplugin.endOfDirectory(plugin_handle)
