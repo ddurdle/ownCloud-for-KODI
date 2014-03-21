@@ -1,12 +1,14 @@
 XBMC-ownCloud
 =============
 
-A ownCloud Video/Music add-on for XBMC
+An ownCloud Video/Music add-on for XBMC
 
 A video add-on for XBMC that enables playback of video and music files stored in a ownCloud account.
 
 - tested with ownCloud 6
-- public test servers (https - my.owndrive.com; http - owncloud.arvixe.com)
+- public test servers (where I have tested)
+	- https - my.owndrive.com; cloudu.de
+	- http - owncloud.arvixe.com
 
 Session handling has been generalized to work on multiple server platforms, but may not work on your ownCloud installation.
 
