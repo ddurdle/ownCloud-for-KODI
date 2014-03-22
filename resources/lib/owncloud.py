@@ -216,7 +216,7 @@ class owncloud:
                 fileType = self.MEDIA_TYPE_MUSIC
 
             if contentType == 'dir':
-                videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + fileName, 'mediaType': self.MEDIA_TYPE_FOLDER}
+                videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
             elif cacheType == self.CACHE_TYPE_MEMORY:
                 videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
             elif cacheType == self.CACHE_TYPE_AJAX:

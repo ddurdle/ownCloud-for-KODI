@@ -1,3 +1,4 @@
+- fix for subfolders [Does not work on Android #1] (Thx HLFH, for reporting the issue)
 Version 0.2.0
 - Public release
 - support music and video
