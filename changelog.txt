@@ -1,3 +1,5 @@
+Version 0.2.0
+- merge changes contributed by fduraibi
 - fix for subfolders [Does not work on Android #1] (Thx HLFH, for reporting the issue)
 Version 0.2.0
 - Public release
