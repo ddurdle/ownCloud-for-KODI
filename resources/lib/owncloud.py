@@ -93,7 +93,7 @@ class owncloud:
         response_data = response.read()
         response.close()
 
-        url = self.protocol + self.domain + '/'
+        url = self.protocol + self.domain + '/index.php'
 
         values = {
                   'password' : self.password,
@@ -207,6 +207,8 @@ class owncloud:
             for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
                 fileID,fileName,contentType,fileType = q.groups()
 
+            # Undo any urlencoding before displaying the files (should also make the folders accessible)
+            fileName = urllib.unquote(fileName)
 
             log('found video %s %s' % (fileID, fileName))
 
