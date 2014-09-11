@@ -1,3 +1,7 @@
+Version 0.3.1
+- fix: Add-on icon #3 by fduraibi
+- fix: support OwnCloud 7 #4
+- fix: Update owncloud.py #2 by fduraibi
 Version 0.3
 - clarified "domain" in settings with www.yourdomain.com/owncloud/
 - experimental support for OwnCloud v7

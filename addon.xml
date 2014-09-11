@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.owncloud" version="0.3.0" name="ownCloud" provider-name="ddurdle">
+<addon id="plugin.video.owncloud" version="0.3.1" name="ownCloud" provider-name="ddurdle">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
     </requires>
@@ -7,8 +7,8 @@
         <provides>video audio</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary>Plays video and music from your ownCloud service</summary>
-        <description>Plays video and music from your ownCloud service</description>
+        <summary>Plays video and music from your OwnCloud service</summary>
+        <description>Plays video and music from your OwnCloud service.  Supports OwnCloud 6 (including Enterprise Edition) & 7</description>
         <platform>all</platform>
     </extension>
 </addon>
