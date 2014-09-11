@@ -9,6 +9,7 @@
     <string id="30007">Protocol</string>
     <string id="30008">Login</string>
     <string id="30009">Playback</string>
+    <string id="30010">OwnCloud Version</string>
     <string id="30015">Set the Username and Password in addon settings before running.</string>
     <string id="30016">You must add org.python.pydev.debug.pysrc to your PYTHONPATH.</string>
     <string id="30017">Login information is incorrect or permission is denied</string>

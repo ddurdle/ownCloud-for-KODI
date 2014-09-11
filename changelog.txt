@@ -1,4 +1,7 @@
-Version 0.2.0
+Version 0.3
+- clarified "domain" in settings with www.yourdomain.com/owncloud/
+- experimental support for OwnCloud v7
+Version 0.2.2
 - merge changes contributed by fduraibi
 - fix for subfolders [Does not work on Android #1] (Thx HLFH, for reporting the issue)
 Version 0.2.0

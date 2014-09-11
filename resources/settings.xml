@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-  	<setting id="domain" type="text" label="30003" default="" />
+  	<setting id="domain" type="text" label="30003" default="www.yourdomain.com/owncloud/" />
   	<setting id="protocol" type="enum" label="30007" values="HTTP|HTTPS" default="0" />
   	<setting id="username" type="text" label="30001" default="" />
 	<setting id="password" type="text" label="30002" option="hidden" default="" />
+ 	<setting id="owncloud_version" type="enum" label="30010" values="6|7" default="0" />
   	<setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
     <setting id="playback_type" type="enum" label="30006" values="Memory Cache|Disk Cache|AJAX" default="2"/>
 </settings>

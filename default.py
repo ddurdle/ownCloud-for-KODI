@@ -16,7 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from resources.lib import owncloud
 import sys
 import urllib
 import cgi
@@ -134,12 +133,17 @@ protocol = int(ADDON.getSetting('protocol'))
 user_agent = ADDON.getSetting('user_agent')
 auth = ADDON.getSetting('auth')
 session = ADDON.getSetting('session')
+owncloudVersion = int(ADDON.getSetting('owncloud_version'))
 
 
 if protocol == 1:
     protocol = 'https://'
 else:
     protocol = 'http://'
+
+from resources.lib import owncloud7
+from resources.lib import owncloud
+
 
 
 # you need to have at least a username&password set
@@ -148,8 +152,11 @@ if ((username == '' or password == '')):
     log(ADDON.getLocalizedString(30015), True)
     xbmcplugin.endOfDirectory(plugin_handle)
 
+if owncloudVersion == 1:
+  owncloud = owncloud7.owncloud7(username, password, protocol, domain, auth, session, user_agent)
+else:
+  owncloud = owncloud.owncloud(username, password, protocol, domain, auth, session, user_agent)
 
-owncloud = owncloud.owncloud(username, password, protocol, domain, auth, session, user_agent)
 
 
 log('plugin url: ' + plugin_url)
