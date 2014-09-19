@@ -241,30 +241,17 @@ class owncloud:
     #   parameters: title of video, whether to prompt for quality/format (optional), cache type (optional)
     #   returns: list of URLs for the video or single URL of video (if not prompting for quality)
     ##
-    def getVideoLink(self,filename,cacheType=0):
+    def getVideoLink(self,filename,directory,cacheType=0):
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         # default User-Agent ('Python-urllib/2.6') will *not* work
         opener.addheaders = [('User-Agent', self.user_agent)]
 
-        params = urllib.urlencode({'files': filename, 'dir': dir})
+        params = urllib.urlencode({'files': filename, 'dir': directory})
         url = self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params
 
+        return url + '|' + self.getHeadersEncoded()
 
-
-        playbackURL = 0
-        # fetch video title, download URL and docid for stream link
-        for r in re.finditer('\{\"id"\:\"([^\"]+)\"\,\"title\"\:\"([^\"]+)\"\,.*?\"down\"\:\"([^\"]+)\"[^\}]+\}' ,response_data, re.DOTALL):
-             fileID,fileTitle,fileURL = r.groups()
-             if fileID == filename:
-                 log('found video %s %s %s' % (fileID, fileURL, fileTitle))
-                 fileURL = re.sub('\\\\', '', fileURL)
-                 playbackURL = fileURL
-
-
-        response.close()
-
-        return playbackURL
 
 
 

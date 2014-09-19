@@ -33,11 +33,13 @@ Features and limitations:
 - will index videos, music and folders in your ownCloud account
 - no pictures at this time
 
-Modes:
-1) standard index
+How to use:
 - starting the plugin via video or audio add-ons will display a directory containing all video files within the ownCloud account or those that are shared to that account
 - click on the video or music file to playback
-- any "favourites" created will expire based on the session-expiration set on your ownCloud account (they'll be pre-fixed with session information)
+
+Calling this plugin using STRM files or other plugins:
+See https://github.com/ddurdle/XBMC-ownCloud/wiki/ownCloud-Add-on-API
+
 
 FAQ:
 

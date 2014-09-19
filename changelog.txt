@@ -1,3 +1,5 @@
+Version 0.3.3
+- fix for API calls
 Version 0.3.2
 - fix: On XBMC Kodi 14.0 Alpha 3, install error. #5 -- corrupt addon.xml
 Version 0.3.1

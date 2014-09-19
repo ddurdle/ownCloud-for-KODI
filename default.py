@@ -187,31 +187,20 @@ if mode == 'main' or mode == 'folder':
             addMusic(videos[title]['url'],{ 'title' : title , 'plot' : title }, title)
 
 #play a video given its exact-title
-elif mode == 'video':
+elif mode == 'video' or mode == 'audio':
     filename = plugin_queries['filename']
-    cacheType = ADDON.getSetting('playback_type')
+    try:
+        directory = plugin_queries['directory']
+        cacheType = ADDON.getSetting('playback_type')
+    except:
+        directory = ''
+        cacheType = 0
 
     if cacheType == '0':
-      videoURL = owncloud.getVideoLink(title)
+      videoURL = owncloud.getVideoLink(filename,directory)
     else:
-      videoURL = owncloud.getVideoLink(title,True,cacheType)
+      videoURL = owncloud.getVideoLink(filename,directory,cacheType)
 
-    item = xbmcgui.ListItem(path=videoURL)
-    log('play url: ' + videoURL)
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-
-
-
-#force stream - play a video given its exact-title
-elif mode == 'audio':
-    try:
-      filename = plugin_queries['filename']
-    except:
-      title = 0
-
-
-    # immediately play resulting (is a video)
-    videoURL = owncloud.getVideoLink(filename, 2)
     item = xbmcgui.ListItem(path=videoURL)
     log('play url: ' + videoURL)
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
