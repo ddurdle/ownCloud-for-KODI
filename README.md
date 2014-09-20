@@ -38,7 +38,8 @@ How to use:
 - click on the video or music file to playback
 
 Calling this plugin using STRM files or other plugins:
-See https://github.com/ddurdle/XBMC-ownCloud/wiki/ownCloud-Add-on-API
+
+See https://github.com/ddurdle/XBMC-ownCloud/wiki/-Add-on-API
 
 
 FAQ:
@@ -51,6 +52,6 @@ Music and video files are supported; pictures/images or anyother file type is no
 
 
 Roadmap to future releases:
-- support for multiple ownCloud accounts
-- support for pictures (maybe in a very distant future)
+
+See https://github.com/ddurdle/XBMC-ownCloud/wiki/Roadmap
 
