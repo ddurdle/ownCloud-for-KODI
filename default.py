@@ -203,6 +203,7 @@ elif mode == 'video' or mode == 'audio':
 
     item = xbmcgui.ListItem(path=videoURL)
     log('play url: ' + videoURL)
+    item.setInfo( type="Video", infoLabels={ "Title": filename , "Plot" : filename } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 

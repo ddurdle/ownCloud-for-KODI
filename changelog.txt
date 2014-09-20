@@ -1,3 +1,4 @@
+- fix title to display properly and consistently
 Version 0.3.3
 - fix for API calls
 Version 0.3.2
