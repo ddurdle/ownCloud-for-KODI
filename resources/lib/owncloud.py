@@ -1,6 +1,6 @@
 '''
     owncloud XBMC Plugin
-    Copyright (C) 2013 dmdsoftware
+    Copyright (C) 2013-2014 ddurdle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,11 +53,14 @@ class owncloud:
     CACHE_TYPE_MEMORY = 0
     CACHE_TYPE_DISK = 1
     CACHE_TYPE_AJAX = 2
+    OWNCLOUD_V6 = 0
+    OWNCLOUD_V7 = 1
 
     ##
-    # initialize (setting 1) username, 2) password, 3) authorization token, 4) user agent string
+    # initialize setting 0) version 1) username, 2) password, 3) authorization token, 4) user agent string
     ##
-    def __init__(self, user, password, protocol, domain, auth, session, user_agent):
+    def __init__(self, version, user, password, protocol, domain, auth, session, user_agent):
+        self.version = version
         self.user = user
         self.password = password
         self.user_agent = user_agent
@@ -180,7 +183,10 @@ class owncloud:
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = self.getHeadersList()
 
-        url = self.protocol + self.domain +'/index.php/apps/files?' + urllib.urlencode({'dir' : folderName})
+        if (self.version == self.OWNCLOUD_V6):
+            url = self.protocol + self.domain +'/index.php/apps/files?' + urllib.urlencode({'dir' : folderName})
+        else:
+            url = self.protocol + self.domain +'/index.php/apps/files/ajax/list.php?'+ urllib.urlencode({'dir' : folderName})+'&sort=name&sortdirection=asc'
 
         # if action fails, validate login
         try:
@@ -210,31 +216,59 @@ class owncloud:
               return
         videos = {}
         # parsing page for files
-        for r in re.finditer('\<tr data\-id\=.*?</tr>' ,response_data, re.DOTALL):
-            entry = r.group()
-            for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
-                fileID,fileName,contentType,fileType = q.groups()
+        if (self.version == self.OWNCLOUD_V6):
 
-            # Undo any urlencoding before displaying the files (should also make the folders accessible)
-            fileName = urllib.unquote(fileName)
+            for r in re.finditer('\<tr data\-id\=.*?</tr>' ,response_data, re.DOTALL):
+                entry = r.group()
+                for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
+                    fileID,fileName,contentType,fileType = q.groups()
 
-            log('found video %s %s' % (fileID, fileName))
+                    # Undo any urlencoding before displaying the files (should also make the folders accessible)
+                    fileName = urllib.unquote(fileName)
 
-            if fileType == 'video':
-                fileType = self.MEDIA_TYPE_VIDEO
-            elif fileType == 'audio':
-                fileType = self.MEDIA_TYPE_MUSIC
+                    log('found video %s %s' % (fileID, fileName))
 
-            if contentType == 'dir':
-                videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
-            elif cacheType == self.CACHE_TYPE_MEMORY:
-                videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
-            elif cacheType == self.CACHE_TYPE_AJAX:
-                videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
+                    if fileType == 'video':
+                        fileType = self.MEDIA_TYPE_VIDEO
+                    elif fileType == 'audio':
+                        fileType = self.MEDIA_TYPE_MUSIC
 
-        return videos
+                    if contentType == 'dir':
+                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
+                    elif cacheType == self.CACHE_TYPE_MEMORY:
+                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
+                    elif cacheType == self.CACHE_TYPE_AJAX:
+                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
 
+            return videos
+        else:
+            for r in re.finditer('\[\{.*?\}\]' ,response_data, re.DOTALL):
+                entry = r.group()
 
+                for s in re.finditer('\{.*?\}' ,entry, re.DOTALL):
+                    item = s.group()
+
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\"' ,item, re.DOTALL):
+                        fileID,fileName,fileType,contentType = q.groups()
+
+                        # Undo any urlencoding before displaying the files (should also make the folders accessible)
+                        fileName = urllib.unquote(fileName)
+
+                        log('found video %s %s' % (fileID, fileName))
+
+                        if fileType == 'video\\':
+                            fileType = self.MEDIA_TYPE_VIDEO
+                        elif fileType == 'audio\\':
+                            fileType = self.MEDIA_TYPE_MUSIC
+
+                        if contentType == 'dir':
+                            videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
+                        elif cacheType == self.CACHE_TYPE_MEMORY:
+                            videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
+                        elif cacheType == self.CACHE_TYPE_AJAX:
+                            videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
+
+            return videos
 
     ##
     # retrieve a video link

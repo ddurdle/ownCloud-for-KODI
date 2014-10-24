@@ -1,6 +1,6 @@
 '''
     owncloud XBMC Plugin
-    Copyright (C) 2013 dmdsoftware
+    Copyright (C) 2013-2014 ddurdle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -141,7 +141,7 @@ if protocol == 1:
 else:
     protocol = 'http://'
 
-from resources.lib import owncloud7
+#from resources.lib import owncloud7
 from resources.lib import owncloud
 
 
@@ -152,10 +152,7 @@ if ((username == '' or password == '')):
     log(ADDON.getLocalizedString(30015), True)
     xbmcplugin.endOfDirectory(plugin_handle)
 
-if owncloudVersion == 1:
-  owncloud = owncloud7.owncloud7(username, password, protocol, domain, auth, session, user_agent)
-else:
-  owncloud = owncloud.owncloud(username, password, protocol, domain, auth, session, user_agent)
+owncloud = owncloud.owncloud(owncloudVersion,username, password, protocol, domain, auth, session, user_agent)
 
 
 
