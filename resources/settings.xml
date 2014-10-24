@@ -1,11 +1,76 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-  	<setting id="domain" type="text" label="30003" default="www.yourdomain.com/owncloud/" />
-  	<setting id="protocol" type="enum" label="30007" values="HTTP|HTTPS" default="0" />
-  	<setting id="username" type="text" label="30001" default="" />
-	<setting id="password" type="text" label="30002" option="hidden" default="" />
- 	<setting id="owncloud_version" type="enum" label="30010" values="6|7" default="0" />
-  	<setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
-    <setting id="playback_type" type="enum" label="30006" values="Memory Cache|Disk Cache|AJAX" default="2"/>
+    <category label="30020">
+        <setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
+        <setting id="playback_type" type="enum" label="30006" values="Memory Cache|Disk Cache|AJAX" default="2"/>
+    </category>
+    <category label="30021">
+        <setting type="action" label="30018" option="close" action="RunPlugin(plugin://plugin.video.ownCloud/?mode=clearauth)"/>
+
+        <setting label="30030" type="lsep"/>
+        <setting id="owncloud_numaccounts" type="integer" hidden="true" default="10" label="30022" />
+        <setting id="accounts" type="labelenum" values="1|2|3|4|5|6|7|8|9|10" default="1" label="" />
+
+      	<setting id="domain" type="text" label="30003"   visible="eq(-1,0)" default="www.yourdomain.com/owncloud/" />
+      	<setting id="protocol" type="enum" label="30007" visible="eq(-2,0)" values="HTTP|HTTPS" default="0" />
+      	<setting id="username" type="text" label="30001" visible="eq(-3,0)" default="" />
+    	<setting id="password" type="text" label="30002" visible="eq(-4,0)" option="hidden" default="" />
+     	<setting id="owncloud_version" type="enum"       visible="eq(-5,0)" label="30010" values="6|7" default="0" />
+
+        <setting id="owncloud2_domain" type="text" label="30003"   visible="eq(-6,1)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud2_protocol" type="enum" label="30007" visible="eq(-7,1)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud2_username" type="text" label="30001" visible="eq(-8,1)" default="" />
+        <setting id="owncloud2_password" type="text" label="30002" visible="eq(-9,1)" option="hidden" default="" />
+        <setting id="owncloud2_version" type="enum"  label="30010" visible="eq(-10,1)" values="6|7" default="0" />
+
+        <setting id="owncloud3_domain" type="text" label="30003"   visible="eq(-11,2)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud3_protocol" type="enum" label="30007" visible="eq(-12,2)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud3_username" type="text" label="30001" visible="eq(-13,2)" default="" />
+        <setting id="owncloud3_password" type="text" label="30002" visible="eq(-14,2)" option="hidden" default="" />
+        <setting id="owncloud3_version" type="enum"  label="30010" visible="eq(-15,2)" values="6|7" default="0" />
+
+        <setting id="owncloud4_domain" type="text" label="30003"   visible="eq(-16,3)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud4_protocol" type="enum" label="30007" visible="eq(-17,3)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud4_username" type="text" label="30001" visible="eq(-18,3)" default="" />
+        <setting id="owncloud4_password" type="text" label="30002" visible="eq(-19,3)" option="hidden" default="" />
+        <setting id="owncloud4_version" type="enum"  label="30010" visible="eq(-20,3)" values="6|7" default="0" />
+
+        <setting id="owncloud5_domain" type="text" label="30003"   visible="eq(-21,4)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud5_protocol" type="enum" label="30007" visible="eq(-22,4)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud5_username" type="text" label="30001" visible="eq(-23,4)" default="" />
+        <setting id="owncloud5_password" type="text" label="30002" visible="eq(-24,4)" option="hidden" default="" />
+        <setting id="owncloud5_version" type="enum"  label="30010" visible="eq(-25,4)" values="6|7" default="0" />
+
+        <setting id="owncloud6_domain" type="text" label="30003"   visible="eq(-26,5)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud6_protocol" type="enum" label="30007" visible="eq(-27,5)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud6_username" type="text" label="30001" visible="eq(-28,5)" default="" />
+        <setting id="owncloud6_password" type="text" label="30002" visible="eq(-29,5)" option="hidden" default="" />
+        <setting id="owncloud6_version" type="enum"  label="30010" visible="eq(-30,5)" values="6|7" default="0" />
+
+        <setting id="owncloud7_domain" type="text" label="30003"   visible="eq(-31,6)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud7_protocol" type="enum" label="30007" visible="eq(-32,6)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud7_username" type="text" label="30001" visible="eq(-33,6)" default="" />
+        <setting id="owncloud7_password" type="text" label="30002" visible="eq(-34,6)" option="hidden" default="" />
+        <setting id="owncloud7_version" type="enum"  label="30010" visible="eq(-35,6)" values="6|7" default="0" />
+
+        <setting id="owncloud8_domain" type="text" label="30003"   visible="eq(-36,7)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud8_protocol" type="enum" label="30007" visible="eq(-37,7)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud8_username" type="text" label="30001" visible="eq(-38,7)" default="" />
+        <setting id="owncloud8_password" type="text" label="30002" visible="eq(-39,7)" option="hidden" default="" />
+        <setting id="owncloud8_version" type="enum"  label="30010" visible="eq(-40,7)" values="6|7" default="0" />
+
+        <setting id="owncloud9_domain" type="text" label="30003"   visible="eq(-41,8)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud9_protocol" type="enum" label="30007" visible="eq(-42,8)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud9_username" type="text" label="30001" visible="eq(-43,8)" default="" />
+        <setting id="owncloud9_password" type="text" label="30002" visible="eq(-44,8)" option="hidden" default="" />
+        <setting id="owncloud9_version" type="enum"  label="30010" visible="eq(-45,8)" values="6|7" default="0" />
+
+        <setting id="owncloud10_domain" type="text" label="30003"   visible="eq(-46,9)" default="www.yourdomain.com/owncloud/" />
+        <setting id="owncloud10_protocol" type="enum" label="30007" visible="eq(-47,9)" values="HTTP|HTTPS" default="0" />
+        <setting id="owncloud10_username" type="text" label="30001" visible="eq(-48,9)" default="" />
+        <setting id="owncloud10_password" type="text" label="30002" visible="eq(-49,9)" option="hidden" default="" />
+        <setting id="owncloud10_version" type="enum"  label="30010" visible="eq(-50,9)" values="6|7" default="0" />
+
+    </category>
 </settings>
 
