@@ -1,3 +1,4 @@
+
 Version 0.3.4
 - merge ownCloud v6  and v7
 - fix title to display properly and consistently
