@@ -5,7 +5,7 @@
         <setting id="playback_type" type="enum" label="30006" values="Memory Cache|Disk Cache|AJAX" default="2"/>
     </category>
     <category label="30021">
-        <setting type="action" label="30018" option="close" action="RunPlugin(plugin://plugin.video.ownCloud/?mode=clearauth)"/>
+        <setting type="action" label="30018" option="close" action="RunPlugin(plugin://plugin.video.owncloud/?mode=clearauth)"/>
 
         <setting label="30030" type="lsep"/>
         <setting id="owncloud_numaccounts" type="integer" hidden="true" default="10" label="30022" />

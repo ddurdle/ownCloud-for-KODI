@@ -16,6 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from resources.lib import owncloud
+#from resources.lib import gPlayer
+#from resources.lib import tvWindow
+from resources.lib import cloudservice
+from resources.lib import folder
+from resources.lib import file
+from resources.lib import mediaurl
+
+
 import sys
 import urllib
 import cgi
@@ -25,16 +34,15 @@ import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
 # global variables
 PLUGIN_NAME = 'plugin.video.owncloud'
-PLUGIN_URL = 'plugin://'+PLUGIN_NAME+'/'
-ADDON = xbmcaddon.Addon(id=PLUGIN_NAME)
+
 
 
 #helper methods
 def log(msg, err=False):
     if err:
-        xbmc.log(ADDON.getAddonInfo('name') + ': ' + msg, xbmc.LOGERROR)
+        xbmc.log(addon.getAddonInfo('name') + ': ' + msg, xbmc.LOGERROR)
     else:
-        xbmc.log(ADDON.getAddonInfo('name') + ': ' + msg, xbmc.LOGDEBUG)
+        xbmc.log(addon.getAddonInfo('name') + ': ' + msg, xbmc.LOGDEBUG)
 
 def parse_query(query):
     queries = cgi.parse_qs(query)
@@ -44,6 +52,36 @@ def parse_query(query):
     q['mode'] = q.get('mode', 'main')
     return q
 
+def addMediaFile(service, media):
+
+    listitem = xbmcgui.ListItem(media.title, iconImage=media.thumbnail,
+                                thumbnailImage=media.thumbnail)
+    if media.type == media.AUDIO:
+        infolabels = decode_dict({ 'title' : media.title })
+        listitem.setInfo('Music', infolabels)
+    else:
+        infolabels = decode_dict({ 'title' : media.title , 'plot' : media.plot })
+        listitem.setInfo('Video', infolabels)
+
+    listitem.setProperty('IsPlayable', 'true')
+    listitem.setProperty('fanart_image', media.fanart)
+    cm=[]
+    url = service.getPlaybackCall(media)
+    cleanURL = re.sub('---', '', url)
+    cleanURL = re.sub('&', '---', cleanURL)
+    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+media.title+'&streamurl='+cleanURL+')', ))
+    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+url+'&quality=SD&stream=1', ))
+    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+url+'&quality=HD&stream=1)', ))
+    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+url+'&stream=0)', ))
+    cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+media.title+'&filename='+media.id+')', ))
+
+#    listitem.addContextMenuItems( commands )
+    if cm:
+        listitem.addContextMenuItems(cm, False)
+    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
+                                isFolder=False, totalItems=0)
+
+#***phase out
 def addVideo(url, infolabels, label, img='', fanart='', total_items=0,
                    cm=[], cm_replace=False):
     infolabels = decode_dict(infolabels)
@@ -57,7 +95,7 @@ def addVideo(url, infolabels, label, img='', fanart='', total_items=0,
         listitem.addContextMenuItems(cm, cm_replace)
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=False, totalItems=total_items)
-
+#***phase out
 def addMusic(url, infolabels, label, img='', fanart='', total_items=0,
                    cm=[], cm_replace=False):
     infolabels = decode_dict(infolabels)
@@ -72,14 +110,37 @@ def addMusic(url, infolabels, label, img='', fanart='', total_items=0,
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=False, totalItems=total_items)
 
+#***phase out
 def addDirectory(url, title, img='', fanart='', total_items=0):
     log('adding dir: %s - %s' % (title, url))
     listitem = xbmcgui.ListItem(decode(title), iconImage=img, thumbnailImage=img)
     if not fanart:
-        fanart = ADDON.getAddonInfo('path') + '/fanart.jpg'
+        fanart = addon.getAddonInfo('path') + '/fanart.jpg'
     listitem.setProperty('fanart_image', fanart)
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=True, totalItems=total_items)
+
+#def addDirectory(service, folder):
+#    listitem = xbmcgui.ListItem(decode(folder.title), iconImage='', thumbnailImage='')
+#    fanart = addon.getAddonInfo('path') + '/fanart.jpg'
+
+#    if folder.id != '':
+#        cm=[]
+#        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+#        listitem.addContextMenuItems(cm, False)
+
+#    listitem.setProperty('fanart_image', fanart)
+#    xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
+#                                isFolder=True, totalItems=0)
+
+def addMenu(url,title):
+    listitem = xbmcgui.ListItem(decode(title), iconImage='', thumbnailImage='')
+    fanart = addon.getAddonInfo('path') + '/fanart.jpg'
+
+    listitem.setProperty('fanart_image', fanart)
+    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
+                                isFolder=True, totalItems=0)
+
 
 #http://stackoverflow.com/questions/1208916/decoding-html-entities-with-python/1208931#1208931
 def _callback(matches):
@@ -99,17 +160,35 @@ def decode_dict(data):
     return data
 
 
+def numberOfAccounts(accountType):
+
+    count = 1
+    max_count = int(addon.getSetting(accountType+'_numaccounts'))
+    actualCount = 0
+    while True:
+        try:
+            if addon.getSetting(accountType+str(count)+'_username') != '':
+                actualCount = actualCount + 1
+        except:
+            break
+        if count == max_count:
+            break
+        count = count + 1
+    return actualCount
+
 
 #global variables
-plugin_url = sys.argv[0]
+PLUGIN_URL = sys.argv[0]
 plugin_handle = int(sys.argv[1])
 plugin_queries = parse_query(sys.argv[2][1:])
 
+addon = xbmcaddon.Addon(id='plugin.video.owncloud')
 
+#debugging
 try:
 
-    remote_debugger = ADDON.getSetting('remote_debugger')
-    remote_debugger_host = ADDON.getSetting('remote_debugger_host')
+    remote_debugger = addon.getSetting('remote_debugger')
+    remote_debugger_host = addon.getSetting('remote_debugger_host')
 
     # append pydev remote debugger
     if remote_debugger == 'true':
@@ -119,21 +198,22 @@ try:
         # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
         pydevd.settrace(remote_debugger_host, stdoutToServer=True, stderrToServer=True)
 except ImportError:
-    log(ADDON.getLocalizedString(30016), True)
+    log(addon.getLocalizedString(30016), True)
     sys.exit(1)
 except :
     pass
 
 
 # retrieve settings
-username = ADDON.getSetting('username')
-password = ADDON.getSetting('password')
-domain = ADDON.getSetting('domain')
-protocol = int(ADDON.getSetting('protocol'))
-user_agent = ADDON.getSetting('user_agent')
-auth = ADDON.getSetting('auth')
-session = ADDON.getSetting('session')
-owncloudVersion = int(ADDON.getSetting('owncloud_version'))
+user_agent = addon.getSetting('user_agent')
+
+username = addon.getSetting('username')
+password = addon.getSetting('password')
+domain = addon.getSetting('domain')
+protocol = int(addon.getSetting('protocol'))
+auth = addon.getSetting('auth')
+session = addon.getSetting('session')
+owncloudVersion = int(addon.getSetting('owncloud_version'))
 
 
 if protocol == 1:
@@ -141,32 +221,36 @@ if protocol == 1:
 else:
     protocol = 'http://'
 
-#from resources.lib import owncloud7
-from resources.lib import owncloud
-
 
 
 # you need to have at least a username&password set
 if ((username == '' or password == '')):
-    xbmcgui.Dialog().ok(ADDON.getLocalizedString(30000), ADDON.getLocalizedString(30015))
-    log(ADDON.getLocalizedString(30015), True)
+    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+    log(addon.getLocalizedString(30015), True)
     xbmcplugin.endOfDirectory(plugin_handle)
 
 owncloud = owncloud.owncloud(owncloudVersion,username, password, protocol, domain, auth, session, user_agent)
 
 
+mode = plugin_queries['mode']
 
-log('plugin url: ' + plugin_url)
+# make mode case-insensitive
+mode = mode.lower()
+
+
+log('plugin url: ' + PLUGIN_URL)
 log('plugin queries: ' + str(plugin_queries))
 log('plugin handle: ' + str(plugin_handle))
 
-mode = plugin_queries['mode']
+if mode == 'main':
+    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
+
 
 #dump a list of videos available to play
 if mode == 'main' or mode == 'folder':
     log(mode)
 
-    cacheType = int(ADDON.getSetting('playback_type'))
+    cacheType = int(addon.getSetting('playback_type'))
 
     folderID=0
     if (mode == 'folder'):
@@ -188,7 +272,7 @@ elif mode == 'video' or mode == 'audio':
     filename = plugin_queries['filename']
     try:
         directory = plugin_queries['directory']
-        cacheType = ADDON.getSetting('playback_type')
+        cacheType = addon.getSetting('playback_type')
     except:
         directory = ''
         cacheType = 0
@@ -203,12 +287,16 @@ elif mode == 'video' or mode == 'audio':
     item.setInfo( type="Video", infoLabels={ "Title": filename , "Plot" : filename } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
+if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
+    addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
+    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
+
 
 if auth != owncloud.auth:
-    ADDON.setSetting('auth', owncloud.auth)
+    addon.setSetting('auth', owncloud.auth)
 
 if session != owncloud.session:
-    ADDON.setSetting('session', owncloud.session)
+    addon.setSetting('session', owncloud.session)
 
 
 xbmcplugin.endOfDirectory(plugin_handle)
