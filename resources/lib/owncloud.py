@@ -291,13 +291,13 @@ class owncloud(cloudservice):
 
                     if contentType == 'dir':
 #                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
-                        mediaFiles.append(package.package(0,folder.folder(urllib.quote_plus(folderName+'/'+fileName),folderName)) )
+                        mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
 #                    elif cacheType == self.CACHE_TYPE_MEMORY:
 #                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
                     #elif cacheType == self.CACHE_TYPE_AJAX:
 #                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
                     else:
-                        mediaFiles.append(package.package(file.file(urllib.quote_plus(fileName), fileName, fileName, fileType, '', ''),folder.folder(urllib.quote_plus(folderName),folderName)) )
+                        mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', ''),folder.folder(folderName,folderName)) )
 
             return mediaFiles
         else:
@@ -325,9 +325,9 @@ class owncloud(cloudservice):
 #                        elif cacheType == self.CACHE_TYPE_AJAX:
 #                            videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
                         if contentType == 'dir':
-                            mediaFiles.append(package.package(0,folder.folder(urllib.quote_plus(folderName+'/'+fileName),folderName)) )
+                            mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                         else:
-                            mediaFiles.append(package.package(file.file(urllib.quote_plus(fileName), fileName, fileName, fileType, '', ''),folder.folder(urllib.quote_plus(folderName),folderName)) )
+                            mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', ''),folder.folder(folderName,folderName)) )
 
             return mediaFiles
 
@@ -352,16 +352,20 @@ class owncloud(cloudservice):
     # retrieve a playback url
     #   returns: url
     ##
-    def getPlaybackCall(self, file):
-        if file.type == self.VIDEO:
-            return self.PLUGIN_URL+'?mode=play&instance='+self.instanceName+'&filename=' + file.id+'&title=' + file.title
+    def getPlaybackCall(self, playbackType, package):
+        if playbackType == self.CACHE_TYPE_AJAX:
+            params = urllib.urlencode({'files': filename, 'dir': directory})
+            return self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params + '|' + self.getHeadersEncoded()
         else:
-            return self.PLUGIN_URL+'?mode=streamaudio&instance='+self.instanceName+'&filename=' + file.id+'&title=' + file.title
+            return self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote(package.folder.id)+ '/'+urllib.quote(package.file.id) + '|' + self.getHeadersEncoded()
+
     ##
     # retrieve a directory url
     #   returns: url
     ##
     def getDirectoryCall(self, folder):
-        return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&folderID=' + folder.id
+#                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
+
+        return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + folder.id
 
 

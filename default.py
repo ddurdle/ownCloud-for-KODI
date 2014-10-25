@@ -22,8 +22,8 @@ from resources.lib import owncloud
 from resources.lib import cloudservice
 from resources.lib import folder
 from resources.lib import file
-from resources.lib import mediaurl
 from resources.lib import package
+from resources.lib import mediaurl
 
 
 
@@ -54,28 +54,28 @@ def parse_query(query):
     q['mode'] = q.get('mode', 'main')
     return q
 
-def addMediaFile(service, media):
+def addMediaFile(service, playbackType, package):
 
-    listitem = xbmcgui.ListItem(media.title, iconImage=media.thumbnail,
-                                thumbnailImage=media.thumbnail)
-    if media.type == media.AUDIO:
-        infolabels = decode_dict({ 'title' : media.title })
+    listitem = xbmcgui.ListItem(package.file.title, iconImage=package.file.thumbnail,
+                                thumbnailImage=package.file.thumbnail)
+    if package.file.type == package.file.AUDIO:
+        infolabels = decode_dict({ 'title' : package.file.title })
         listitem.setInfo('Music', infolabels)
     else:
-        infolabels = decode_dict({ 'title' : media.title , 'plot' : media.plot })
+        infolabels = decode_dict({ 'title' : package.file.title , 'plot' : package.file.plot })
         listitem.setInfo('Video', infolabels)
 
     listitem.setProperty('IsPlayable', 'true')
-    listitem.setProperty('fanart_image', media.fanart)
+    listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
-    url = service.getPlaybackCall(media)
+    url = service.getPlaybackCall(package)
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
-    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+media.title+'&streamurl='+cleanURL+')', ))
+    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
     cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+url+'&quality=SD&stream=1', ))
     cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+url+'&quality=HD&stream=1)', ))
     cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+url+'&stream=0)', ))
-    cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+media.title+'&filename='+media.id+')', ))
+    cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
 
 #    listitem.addContextMenuItems( commands )
     if cm:
@@ -334,9 +334,9 @@ if mode == 'main' or mode == 'folder':
                     if item.file == 0:
                         addDirectory(oc, item.folder)
                     else:
-                        addMediaFile(oc, item.file)
+                        addMediaFile(oc, cacheType, item)
                 except:
-                        addMediaFile(oc, item.file)
+                        addMediaFile(oc, cacheType, item)
 
         oc.updateAuthorization(addon)
 
