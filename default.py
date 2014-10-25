@@ -23,6 +23,8 @@ from resources.lib import cloudservice
 from resources.lib import folder
 from resources.lib import file
 from resources.lib import mediaurl
+from resources.lib import package
+
 
 
 import sys
@@ -33,7 +35,7 @@ import re
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
 # global variables
-PLUGIN_NAME = 'plugin.video.owncloud'
+PLUGIN_NAME = 'owncloud'
 
 
 
@@ -111,27 +113,26 @@ def addMusic(url, infolabels, label, img='', fanart='', total_items=0,
                                 isFolder=False, totalItems=total_items)
 
 #***phase out
-def addDirectory(url, title, img='', fanart='', total_items=0):
-    log('adding dir: %s - %s' % (title, url))
-    listitem = xbmcgui.ListItem(decode(title), iconImage=img, thumbnailImage=img)
-    if not fanart:
-        fanart = addon.getAddonInfo('path') + '/fanart.jpg'
-    listitem.setProperty('fanart_image', fanart)
-    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
-                                isFolder=True, totalItems=total_items)
-
-#def addDirectory(service, folder):
-#    listitem = xbmcgui.ListItem(decode(folder.title), iconImage='', thumbnailImage='')
-#    fanart = addon.getAddonInfo('path') + '/fanart.jpg'
-
-#    if folder.id != '':
-#        cm=[]
-#        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
-#        listitem.addContextMenuItems(cm, False)
-
+#def addDirectory(url, title, img='', fanart='', total_items=0):
+#    log('adding dir: %s - %s' % (title, url))
+#    listitem = xbmcgui.ListItem(decode(title), iconImage=img, thumbnailImage=img)
+#    if not fanart:
+#        fanart = addon.getAddonInfo('path') + '/fanart.jpg'
 #    listitem.setProperty('fanart_image', fanart)
-#    xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
-#                                isFolder=True, totalItems=0)
+#    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
+#                                isFolder=True, totalItems=total_items)
+
+def addDirectory(service, folder):
+    listitem = xbmcgui.ListItem(decode(folder.title), iconImage='', thumbnailImage='')
+    fanart = addon.getAddonInfo('path') + '/fanart.jpg'
+
+    if folder.id != '':
+        cm=[]
+        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        listitem.addContextMenuItems(cm, False)
+    listitem.setProperty('fanart_image', fanart)
+    xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
+                                isFolder=True, totalItems=0)
 
 def addMenu(url,title):
     listitem = xbmcgui.ListItem(decode(title), iconImage='', thumbnailImage='')
@@ -207,30 +208,6 @@ except :
 # retrieve settings
 user_agent = addon.getSetting('user_agent')
 
-username = addon.getSetting('username')
-password = addon.getSetting('password')
-domain = addon.getSetting('domain')
-protocol = int(addon.getSetting('protocol'))
-auth = addon.getSetting('auth')
-session = addon.getSetting('session')
-owncloudVersion = int(addon.getSetting('owncloud_version'))
-
-
-if protocol == 1:
-    protocol = 'https://'
-else:
-    protocol = 'http://'
-
-
-
-# you need to have at least a username&password set
-if ((username == '' or password == '')):
-    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
-    log(addon.getLocalizedString(30015), True)
-    xbmcplugin.endOfDirectory(plugin_handle)
-
-owncloud = owncloud.owncloud(owncloudVersion,username, password, protocol, domain, auth, session, user_agent)
-
 
 mode = plugin_queries['mode']
 
@@ -248,24 +225,121 @@ if mode == 'main':
 
 #dump a list of videos available to play
 if mode == 'main' or mode == 'folder':
-    log(mode)
 
     cacheType = int(addon.getSetting('playback_type'))
 
-    folderID=0
+    folderName=''
+
     if (mode == 'folder'):
         folderName = plugin_queries['directory']
-        videos = owncloud.getVideosList(folderName, cacheType=cacheType)
     else:
-        videos = owncloud.getVideosList(cacheType=cacheType)
+        pass
 
-    for title in sorted(videos.iterkeys()):
-        if videos[title]['mediaType'] == owncloud.MEDIA_TYPE_FOLDER:
-            addDirectory(videos[title]['url'],title)
-        elif videos[title]['mediaType'] == owncloud.MEDIA_TYPE_VIDEO:
-            addVideo(videos[title]['url'],{ 'title' : title , 'plot' : title }, title)
-        elif videos[title]['mediaType'] == owncloud.MEDIA_TYPE_MUSIC:
-            addMusic(videos[title]['url'],{ 'title' : title , 'plot' : title }, title)
+    instanceName = ''
+    try:
+        instanceName = plugin_queries['instance']
+    except:
+        pass
+
+    numberOfAccounts = numberOfAccounts(PLUGIN_NAME)
+
+    # show list of services
+    if numberOfAccounts > 1 and instanceName == '':
+        count = 1
+        max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+        while True:
+            instanceName = PLUGIN_NAME+str(count)
+            try:
+                username = addon.getSetting(instanceName+'_username')
+                if username != '':
+                    addMenu(PLUGIN_URL+'?mode=main&instance='+instanceName,username)
+            except:
+                break
+            if count == max_count:
+                break
+            count = count + 1
+
+    else:
+        # show index of accounts
+        if instanceName == '' and numberOfAccounts == 1:
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+
+                            # you need to have at least a username&password set or an authorization token
+#                            if ((username == '' or password == '') and auth_token == ''):
+#                                xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+#                                log(addon.getLocalizedString(30015), True)
+#                                xbmcplugin.endOfDirectory(plugin_handle)
+
+                            #let's log in
+                            oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
+
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+        # no accounts defined
+        elif numberOfAccounts == 0:
+
+            #legacy account conversion
+            try:
+                username = addon.getSetting('username')
+
+                if username != '':
+                    addon.setSetting(PLUGIN_NAME+'1_username', username)
+                    addon.setSetting(PLUGIN_NAME+'1_password', addon.getSetting('password'))
+                    addon.setSetting(PLUGIN_NAME+'1_domain', addon.getSetting('domain'))
+                    addon.setSetting(PLUGIN_NAME+'1_protocol', addon.getSetting('protocol'))
+                    addon.setSetting(PLUGIN_NAME+'1_version', addon.getSetting('version'))
+                    addon.setSetting(PLUGIN_NAME+'1_auth_token', addon.getSetting('auth_token'))
+                    addon.setSetting(PLUGIN_NAME+'1_auth_session', addon.getSetting('auth_session'))
+                    addon.setSetting('username', '')
+                    addon.setSetting('password', '')
+                    addon.setSetting('protocol', '')
+                    addon.setSetting('domain', '')
+                    addon.setSetting('version', '')
+                    addon.setSetting('auth_token', '')
+                    addon.setSetting('auth_session', '')
+            except :
+                    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                    log(addon.getLocalizedString(30015), True)
+                    xbmcplugin.endOfDirectory(plugin_handle)
+
+            #let's log in
+            oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
+
+
+        # show entries of a single account (such as folder)
+        elif instanceName != '':
+
+            oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
+
+
+
+        mediaItems = oc.getMediaList(folderName,0)
+
+        if mediaItems:
+            for item in mediaItems:
+
+                try:
+                    if item.file == 0:
+                        addDirectory(oc, item.folder)
+                    else:
+                        addMediaFile(oc, item.file)
+                except:
+                        addMediaFile(oc, item.file)
+
+        oc.updateAuthorization(addon)
+
 
 #play a video given its exact-title
 elif mode == 'video' or mode == 'audio':
@@ -291,12 +365,6 @@ if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
     addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
     addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
 
-
-if auth != owncloud.auth:
-    addon.setSetting('auth', owncloud.auth)
-
-if session != owncloud.session:
-    addon.setSetting('session', owncloud.session)
 
 
 xbmcplugin.endOfDirectory(plugin_handle)
