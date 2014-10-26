@@ -354,7 +354,7 @@ class owncloud(cloudservice):
     ##
     def getPlaybackCall(self, playbackType, package):
         if playbackType == self.CACHE_TYPE_AJAX:
-            params = urllib.urlencode({'files': filename, 'dir': directory})
+            params = urllib.urlencode({'files': package.file.id, 'dir': package.folder.id})
             return self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params + '|' + self.getHeadersEncoded()
         else:
             return self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote(package.folder.id)+ '/'+urllib.quote(package.file.id) + '|' + self.getHeadersEncoded()

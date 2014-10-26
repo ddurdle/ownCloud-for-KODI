@@ -68,7 +68,7 @@ def addMediaFile(service, playbackType, package):
     listitem.setProperty('IsPlayable', 'true')
     listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
-    url = service.getPlaybackCall(package)
+    url = service.getPlaybackCall(playbackType,package)
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
     cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
