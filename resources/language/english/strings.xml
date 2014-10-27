@@ -11,6 +11,10 @@
     <string id="30009">Playback</string>
     <string id="30010">OwnCloud Version</string>
     <string id="30011">Cache Folder</string>
+    <string id="30012">Cache Folder (custom)</string>
+    <string id="30013">Quick Playback Links (fast but links are not persistent)</string>
+    <string id="30014">Wait for ...</string>
+    <string id="30019">Seconds</string>
     <string id="30015">Set the Username and Password in addon settings before running.</string>
     <string id="30016">You must add org.python.pydev.debug.pysrc to your PYTHONPATH.</string>
     <string id="30017">Login information is incorrect or permission is denied</string>
@@ -40,7 +44,7 @@
     <string id="30043">Options</string>
     <string id="30044">Parameter is missing:</string>
     <string id="30045">Error fetching from cloud service.</string>
-    <string id="30046">Play SD Stream</string>
-    <string id="30047">Play HD Stream</string>
-    <string id="30048">Play Original Format</string>
+    <string id="30046">Watch Stream</string>
+    <string id="30047">Download and Watch</string>
+    <string id="30048">Watch AJAX Stream</string>
 </strings>

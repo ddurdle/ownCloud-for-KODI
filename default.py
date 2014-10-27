@@ -54,27 +54,39 @@ def parse_query(query):
     q['mode'] = q.get('mode', 'main')
     return q
 
-def addMediaFile(service, playbackType, package):
+def addMediaFile(service, isQuickLink, playbackType, package):
 
     listitem = xbmcgui.ListItem(package.file.title, iconImage=package.file.thumbnail,
                                 thumbnailImage=package.file.thumbnail)
+
     if package.file.type == package.file.AUDIO:
         infolabels = decode_dict({ 'title' : package.file.title })
         listitem.setInfo('Music', infolabels)
+        playbackURL = '?mode=audio'
+    elif package.file.type == package.file.VIDEO:
+        infolabels = decode_dict({ 'title' : package.file.title , 'plot' : package.file.plot })
+        listitem.setInfo('Video', infolabels)
+        playbackURL = '?mode=video'
     else:
         infolabels = decode_dict({ 'title' : package.file.title , 'plot' : package.file.plot })
         listitem.setInfo('Video', infolabels)
+        playbackURL = '?mode=video'
 
     listitem.setProperty('IsPlayable', 'true')
     listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
-    url = service.getPlaybackCall(playbackType,package)
+
+    if isQuickLink == True:
+        url = service.getPlaybackCall(playbackType,package)
+    else:
+        url = service.getMediaCall(package)
+
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
     cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
-    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+url+'&quality=SD&stream=1', ))
-    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+url+'&quality=HD&stream=1)', ))
-    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+url+'&stream=0)', ))
+    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
+    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
+    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
     cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
 
 #    listitem.addContextMenuItems( commands )
@@ -82,45 +94,6 @@ def addMediaFile(service, playbackType, package):
         listitem.addContextMenuItems(cm, False)
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=False, totalItems=0)
-
-#***phase out
-def addVideo(url, infolabels, label, img='', fanart='', total_items=0,
-                   cm=[], cm_replace=False):
-    infolabels = decode_dict(infolabels)
-    log('adding video: %s - %s' % (infolabels['title'], url))
-    listitem = xbmcgui.ListItem(label, iconImage=img,
-                                thumbnailImage=img)
-    listitem.setInfo('video', infolabels)
-    listitem.setProperty('IsPlayable', 'true')
-    listitem.setProperty('fanart_image', fanart)
-    if cm:
-        listitem.addContextMenuItems(cm, cm_replace)
-    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
-                                isFolder=False, totalItems=total_items)
-#***phase out
-def addMusic(url, infolabels, label, img='', fanart='', total_items=0,
-                   cm=[], cm_replace=False):
-    infolabels = decode_dict(infolabels)
-    log('adding video: %s - %s' % (infolabels['title'], url))
-    listitem = xbmcgui.ListItem(label, iconImage=img,
-                                thumbnailImage=img)
-    listitem.setInfo('music', infolabels)
-    listitem.setProperty('IsPlayable', 'true')
-    listitem.setProperty('fanart_image', fanart)
-    if cm:
-        listitem.addContextMenuItems(cm, cm_replace)
-    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
-                                isFolder=False, totalItems=total_items)
-
-#***phase out
-#def addDirectory(url, title, img='', fanart='', total_items=0):
-#    log('adding dir: %s - %s' % (title, url))
-#    listitem = xbmcgui.ListItem(decode(title), iconImage=img, thumbnailImage=img)
-#    if not fanart:
-#        fanart = addon.getAddonInfo('path') + '/fanart.jpg'
-#    listitem.setProperty('fanart_image', fanart)
-#    xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
-#                                isFolder=True, totalItems=total_items)
 
 def addDirectory(service, folder):
     listitem = xbmcgui.ListItem(decode(folder.title), iconImage='', thumbnailImage='')
@@ -235,6 +208,15 @@ if mode == 'main' or mode == 'folder':
     else:
         pass
 
+    try:
+        isQuickLink = addon.getSetting('playback_type')
+        if isQuickLink == 'true':
+            isQuickLink = True
+        else:
+            isQuickLink = False
+    except:
+        isQuickLink = False
+
     instanceName = ''
     try:
         instanceName = plugin_queries['instance']
@@ -334,30 +316,74 @@ if mode == 'main' or mode == 'folder':
                     if item.file == 0:
                         addDirectory(oc, item.folder)
                     else:
-                        addMediaFile(oc, cacheType, item)
+                        addMediaFile(oc, isQuickLink, cacheType, item)
                 except:
-                        addMediaFile(oc, cacheType, item)
+                        addMediaFile(oc, isQuickLink, cacheType, item)
 
         oc.updateAuthorization(addon)
 
 
 #play a video given its exact-title
 elif mode == 'video' or mode == 'audio':
+
     filename = plugin_queries['filename']
     try:
         directory = plugin_queries['directory']
-        cacheType = addon.getSetting('playback_type')
     except:
         directory = ''
-        cacheType = 0
 
-    if cacheType == '0':
-      videoURL = owncloud.getVideoLink(filename,directory)
-    else:
-      videoURL = owncloud.getVideoLink(filename,directory,cacheType)
+    try:
+        title = plugin_queries['title']
+    except:
+        title = ''
 
-    item = xbmcgui.ListItem(path=videoURL)
-    log('play url: ' + videoURL)
+    try:
+        cacheType = plugin_queries['playback']
+    except:
+        try:
+            cacheType = int(addon.getSetting('playback_type'))
+        except:
+            cacheType = 0
+
+
+    instanceName = ''
+    try:
+        instanceName = plugin_queries['instance']
+    except:
+        pass
+
+    # show index of accounts
+    if instanceName == '':
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+
+                            #let's log in
+                            oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
+
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+    elif instanceName != '':
+
+            oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
+
+
+
+    mediaFile = file.file(filename, title, '', 0, '','')
+    mediaFolder = folder.folder(directory,directory)
+    url = oc.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
+
+    item = xbmcgui.ListItem(path=url)
     item.setInfo( type="Video", infoLabels={ "Title": filename , "Plot" : filename } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 

@@ -45,6 +45,8 @@ class owncloud(cloudservice):
 
     MEDIA_TYPE_MUSIC = 1
     MEDIA_TYPE_VIDEO = 2
+    MEDIA_TYPE_PICTURE = 3
+
     MEDIA_TYPE_FOLDER = 0
 
     CACHE_TYPE_MEMORY = 0
@@ -288,6 +290,9 @@ class owncloud(cloudservice):
                         fileType = self.MEDIA_TYPE_VIDEO
                     elif fileType == 'audio':
                         fileType = self.MEDIA_TYPE_MUSIC
+                    elif fileType == 'image':
+                        fileType = self.MEDIA_TYPE_PICTURE
+
 
                     if contentType == 'dir':
 #                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
@@ -317,6 +322,8 @@ class owncloud(cloudservice):
                             fileType = self.MEDIA_TYPE_VIDEO
                         elif fileType == 'audio\\':
                             fileType = self.MEDIA_TYPE_MUSIC
+                        elif fileType == 'image\\':
+                            fileType = self.MEDIA_TYPE_PICTURE
 
 #                        if contentType == 'dir':
 #                            videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
@@ -331,22 +338,6 @@ class owncloud(cloudservice):
 
             return mediaFiles
 
-    ##
-    # retrieve a video link
-    #   parameters: title of video, whether to prompt for quality/format (optional), cache type (optional)
-    #   returns: list of URLs for the video or single URL of video (if not prompting for quality)
-    ##
-    def getVideoLink(self,filename,directory,cacheType=0):
-
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-        # default User-Agent ('Python-urllib/2.6') will *not* work
-        opener.addheaders = [('User-Agent', self.user_agent)]
-
-        params = urllib.urlencode({'files': filename, 'dir': directory})
-        url = self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params
-
-        return url + '|' + self.getHeadersEncoded()
-
 
     ##
     # retrieve a playback url
@@ -358,6 +349,19 @@ class owncloud(cloudservice):
             return self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+params + '|' + self.getHeadersEncoded()
         else:
             return self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote(package.folder.id)+ '/'+urllib.quote(package.file.id) + '|' + self.getHeadersEncoded()
+
+    ##
+    # retrieve a media url
+    #   returns: url
+    ##
+    def getMediaCall(self, package):
+        if package.file.type == package.file.VIDEO:
+            return self.PLUGIN_URL+'?mode=video&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+        elif package.file.type == package.file.AUDIO:
+            return self.PLUGIN_URL+'?mode=audio&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+        else:
+            return self.PLUGIN_URL+'?mode=audio&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+
 
     ##
     # retrieve a directory url
