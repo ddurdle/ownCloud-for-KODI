@@ -4,10 +4,10 @@
         <setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
         <setting label="30009" type="lsep"/>
         <setting id="playback_type" type="enum" label="30006" values="Stream|Download to Cache|AJAX" default="2"/>
-        <setting id="playback_delay" type="enum" label="30014" visible="eq(-1,1)" values="until downloaded|seconds"/>
+<!--        <setting id="playback_delay" type="enum" label="30014" visible="eq(-1,1)" values="until downloaded|seconds"/>
         <setting id="playback_seconds" type="text" label="30019" visible="eq(-1,1)" default="5"/>
         <setting id="cache_folder_default" type="enum" label="30011" visible="eq(-3,1)" values="../settings/cache/|custom"/>
-        <setting id="cache_folder" type="folder" label="30012" visible="eq(-1,1)" default="special://profile/addon_data/plugin.video.owncloud/cache"/>
+        <setting id="cache_folder" type="folder" label="30012" visible="eq(-1,1)" default="special://profile/addon_data/plugin.video.owncloud/cache"/>-->
         <setting type="lsep"/>
         <setting id="playback_links" type="bool" label="30013" default="true"/>
     </category>

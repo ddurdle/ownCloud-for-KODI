@@ -83,11 +83,11 @@ def addMediaFile(service, isQuickLink, playbackType, package):
 
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
-    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
+#    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
     cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
-    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
+#    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
     cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
-    cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
+    #cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
 
 #    listitem.addContextMenuItems( commands )
     if cm:
@@ -101,7 +101,7 @@ def addDirectory(service, folder):
 
     if folder.id != '':
         cm=[]
-        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+#        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
         listitem.addContextMenuItems(cm, False)
     listitem.setProperty('fanart_image', fanart)
     xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
@@ -192,8 +192,8 @@ log('plugin url: ' + PLUGIN_URL)
 log('plugin queries: ' + str(plugin_queries))
 log('plugin handle: ' + str(plugin_handle))
 
-if mode == 'main':
-    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
+#if mode == 'main':
+#    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
 
 
 #dump a list of videos available to play
@@ -219,7 +219,7 @@ if mode == 'main' or mode == 'folder':
 
     instanceName = ''
     try:
-        instanceName = plugin_queries['instance']
+        instanceName = (plugin_queries['instance']).lower()
     except:
         pass
 
@@ -253,12 +253,6 @@ if mode == 'main' or mode == 'folder':
                         username = addon.getSetting(instanceName+'_username')
                         if username != '':
 
-                            # you need to have at least a username&password set or an authorization token
-#                            if ((username == '' or password == '') and auth_token == ''):
-#                                xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
-#                                log(addon.getLocalizedString(30015), True)
-#                                xbmcplugin.endOfDirectory(plugin_handle)
-
                             #let's log in
                             oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
 
@@ -291,6 +285,10 @@ if mode == 'main' or mode == 'folder':
                     addon.setSetting('version', '')
                     addon.setSetting('auth_token', '')
                     addon.setSetting('auth_session', '')
+                else:
+                    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                    log(addon.getLocalizedString(30015), True)
+                    xbmcplugin.endOfDirectory(plugin_handle)
             except :
                     xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
                     log(addon.getLocalizedString(30015), True)

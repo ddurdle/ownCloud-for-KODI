@@ -256,23 +256,6 @@ class owncloud(cloudservice):
         response_data = response.read()
         response.close()
 
-#        loginResult = 0
-        #validate successful login
-#        for r in re.finditer('(data-user)\=\"([^\"]+)\" data-requesttoken="([^\"]+)"',
-#                             response_data, re.DOTALL):
-#            loginType,loginResult,requestToken = r.groups()
-
- #       if (loginResult == 0 or loginResult != self.authorization.username):
- #           self.login()
- #           try:
- #               opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-#                opener.addheaders = self.getHeadersList()
-#                response = opener.open(url)
-#                response_data = response.read()
-#                response.close()
-#            except urllib2.URLError, e:
-#                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-#                return
 
         mediaFiles = []
         # parsing page for files
@@ -295,12 +278,7 @@ class owncloud(cloudservice):
 
 
                     if contentType == 'dir':
-#                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
                         mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
-#                    elif cacheType == self.CACHE_TYPE_MEMORY:
-#                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
-                    #elif cacheType == self.CACHE_TYPE_AJAX:
-#                        videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
                     else:
                         mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', ''),folder.folder(folderName,folderName)) )
 
@@ -325,12 +303,6 @@ class owncloud(cloudservice):
                         elif fileType == 'image\\':
                             fileType = self.MEDIA_TYPE_PICTURE
 
-#                        if contentType == 'dir':
-#                            videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
-#                        elif cacheType == self.CACHE_TYPE_MEMORY:
-#                            videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/download/'+urllib.quote_plus(folderName)+ '/'+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
-#                        elif cacheType == self.CACHE_TYPE_AJAX:
-#                            videos[fileName] = {'url': self.protocol + self.domain +'/index.php/apps/files/ajax/download.php?'+ urllib.urlencode({'dir' : folderName})+'&files='+fileName + '|' + self.getHeadersEncoded(), 'mediaType': fileType}
                         if contentType == 'dir':
                             mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                         else:
@@ -356,11 +328,11 @@ class owncloud(cloudservice):
     ##
     def getMediaCall(self, package):
         if package.file.type == package.file.VIDEO:
-            return self.PLUGIN_URL+'?mode=video&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+            return self.PLUGIN_URL+'?mode=video&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
         elif package.file.type == package.file.AUDIO:
-            return self.PLUGIN_URL+'?mode=audio&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
         else:
-            return self.PLUGIN_URL+'?mode=audio&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
 
 
     ##
