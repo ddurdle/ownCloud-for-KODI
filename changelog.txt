@@ -1,5 +1,6 @@
 Version 0.4.3
 - fix HTTPS access
+- fix: HTTPS broken when using OwnCloud v7 #8
 Version 0.4.2
 - clear corrupt pyc files from github
 Version 0.4.1
