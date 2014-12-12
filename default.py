@@ -24,6 +24,7 @@ from resources.lib import folder
 from resources.lib import file
 from resources.lib import package
 from resources.lib import mediaurl
+from resources.lib import authorization
 
 
 

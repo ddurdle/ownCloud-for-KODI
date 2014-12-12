@@ -22,15 +22,15 @@ import os
 import re
 import urllib, urllib2
 import cookielib
+
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin
+
 from resources.lib import authorization
 from cloudservice import cloudservice
 from resources.lib import folder
 from resources.lib import file
 from resources.lib import package
 from resources.lib import mediaurl
-
-
-import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
 
 #
@@ -83,7 +83,7 @@ class owncloud(cloudservice):
             self.version = OWNCLOUD_V6
 
         try:
-            protocol = self.addon.getSetting(self.instanceName+'protocol')
+            protocol = int(self.addon.getSetting(self.instanceName+'_protocol'))
             if protocol == 1:
                 self.protocol = 'https://'
             else:
