@@ -1,3 +1,5 @@
+Version 0.4.4
+- add unicode support for filenames and folders
 Version 0.4.3
 - fix HTTPS access
 - fix: HTTPS broken when using OwnCloud v7 #8

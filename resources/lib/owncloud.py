@@ -266,6 +266,7 @@ class owncloud(cloudservice):
                 for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
                     fileID,fileName,contentType,fileType = q.groups()
 
+                    fileName = unicode(fileName, "unicode-escape")
                     # Undo any urlencoding before displaying the files (should also make the folders accessible)
                     fileName = urllib.unquote(fileName)
 
@@ -292,6 +293,9 @@ class owncloud(cloudservice):
 
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\"' ,item, re.DOTALL):
                         fileID,fileName,fileType,contentType = q.groups()
+
+                        fileName = unicode(fileName, "unicode-escape")
+#                        fileID  = unicode(fileID, "unicode-escape")
 
                         # Undo any urlencoding before displaying the files (should also make the folders accessible)
                         fileName = urllib.unquote(fileName)
@@ -327,12 +331,27 @@ class owncloud(cloudservice):
     #   returns: url
     ##
     def getMediaCall(self, package):
+        try:
+            fileID =  unicode(package.file.id,'utf-8')
+        except:
+            fileID = package.file.id
+
+        try:
+            folderID =  unicode(package.folder.id,'utf-8')
+        except:
+            folderID = package.folder.id
+
+
+
         if package.file.type == package.file.VIDEO:
-            return self.PLUGIN_URL+'?mode=video&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+#            return self.PLUGIN_URL+'?mode=video&instance='+self.instanceName+'&filename='+unicode(package.file.id,'utf-8')+'&title='+unicode(package.file.title,'utf-8')+'&directory=' + unicode(package.folder.id,'utf-8')
+            return self.PLUGIN_URL+'?mode=video&instance='+self.instanceName+'&filename='+fileID+'&title='+fileID+'&directory=' + folderID
         elif package.file.type == package.file.AUDIO:
-            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+#            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+unicode(package.file.id,'utf-8')+'&title='+unicode(package.file.title,'utf-8')+'&directory=' + unicode(package.folder.id,'utf-8')
+            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+fileID+'&title='+fileID+'&directory=' + folderID
         else:
-            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+package.file.id+'&title='+package.file.title+'&directory=' + package.folder.id
+#            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+unicode(package.file.id,'utf-8')+'&title='+unicode(package.file.title,'utf-8')+'&directory=' + unicode(package.folder.id,'utf-8')
+            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+fileID,+'&title='+fileID+'&directory=' + folderID
 
 
     ##
@@ -342,6 +361,10 @@ class owncloud(cloudservice):
     def getDirectoryCall(self, folder):
 #                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
 
-        return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + folder.id
+        try:
+            return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + unicode(folder.id,'utf-8')
+        except:
+            return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + folder.id
+
 
 
