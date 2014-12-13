@@ -1,3 +1,4 @@
+- regression fixes for v6
 Version 0.4.4
 - add unicode support for filenames and folders
 Version 0.4.3

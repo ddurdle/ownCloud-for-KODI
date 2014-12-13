@@ -73,12 +73,7 @@ class owncloud(cloudservice):
         self.authorization = authorization.authorization(username)
 
         try:
-            self.version = self.addon.getSetting(self.instanceName+'_version')
-        except:
-            self.version = OWNCLOUD_V6
-
-        try:
-            self.version = self.addon.getSetting(self.instanceName+'_version')
+            self.version = int(self.addon.getSetting(self.instanceName+'_version'))
         except:
             self.version = OWNCLOUD_V6
 
@@ -281,7 +276,17 @@ class owncloud(cloudservice):
                     if contentType == 'dir':
                         mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                     else:
-                        mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', ''),folder.folder(folderName,folderName)) )
+                        try:
+                                _fileName = unicode(fileName,'utf-8')
+                        except:
+                                _fileName = fileName
+                        try:
+                                _folderName = unicode(folderName,'utf-8')
+                        except:
+                                _folderName = folderName
+                        thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+_folderName+ '/'+_fileName + '&x=50&y=50'+'|' + self.getHeadersEncoded()
+
+                        mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', thumbnail),folder.folder(folderName,folderName)) )
 
             return mediaFiles
         else:
@@ -291,12 +296,10 @@ class owncloud(cloudservice):
                 for s in re.finditer('\{.*?\}' ,entry, re.DOTALL):
                     item = s.group()
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\"' ,item, re.DOTALL):
-                        fileID,fileName,fileType,contentType = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\".*?\"etag\"\:\"([^\"]+)\"' ,item, re.DOTALL):
+                        fileID,fileName,fileType,contentType,etag = q.groups()
 
                         fileName = unicode(fileName, "unicode-escape")
-#                        fileID  = unicode(fileID, "unicode-escape")
-
                         # Undo any urlencoding before displaying the files (should also make the folders accessible)
                         fileName = urllib.unquote(fileName)
 
@@ -308,9 +311,21 @@ class owncloud(cloudservice):
                             fileType = self.MEDIA_TYPE_PICTURE
 
                         if contentType == 'dir':
+
                             mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                         else:
-                            mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', ''),folder.folder(folderName,folderName)) )
+                            try:
+                                _fileName = unicode(fileName,'utf-8')
+                            except:
+                                _fileName = fileName
+                            try:
+                                _folderName = unicode(folderName,'utf-8')
+                            except:
+                                _folderName = folderName
+
+                            thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+_folderName+ '/'+_fileName + '&c='+etag+'&x=50&y=50&forceIcon=0'+'|' + self.getHeadersEncoded()
+
+                            mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', thumbnail),folder.folder(folderName,folderName)) )
 
             return mediaFiles
 
@@ -351,7 +366,7 @@ class owncloud(cloudservice):
             return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+fileID+'&title='+fileID+'&directory=' + folderID
         else:
 #            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+unicode(package.file.id,'utf-8')+'&title='+unicode(package.file.title,'utf-8')+'&directory=' + unicode(package.folder.id,'utf-8')
-            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+fileID,+'&title='+fileID+'&directory=' + folderID
+            return self.PLUGIN_URL+'?mode=audio&instance='+self.instanceName+'&filename='+fileID+'&title='+fileID+'&directory=' + folderID
 
 
     ##
