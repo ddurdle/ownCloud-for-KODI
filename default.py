@@ -202,8 +202,20 @@ log('plugin url: ' + PLUGIN_URL)
 log('plugin queries: ' + str(plugin_queries))
 log('plugin handle: ' + str(plugin_handle))
 
-#if mode == 'main':
-#    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
+if mode == 'main':
+    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
+
+    instanceName = ''
+    try:
+        instanceName = (plugin_queries['instance']).lower()
+    except:
+        pass
+
+    if numberOfAccounts(PLUGIN_NAME) == 1 or instanceName != '' :
+        addMenu(PLUGIN_URL+'?mode=folder&directory=SY','<<Shared with you>>')
+        addMenu(PLUGIN_URL+'?mode=folder&directory=SO','<<Shared with others>>')
+        addMenu(PLUGIN_URL+'?mode=folder&directory=SL','<<Shared by link>>')
+        addMenu(PLUGIN_URL+'?mode=folder&directory=ES','<<External storage>>')
 
 
 #dump a list of videos available to play
@@ -312,7 +324,6 @@ if mode == 'main' or mode == 'folder':
         elif instanceName != '':
 
             oc = owncloud.owncloud(PLUGIN_URL,addon,instanceName, user_agent)
-
 
 
         mediaItems = oc.getMediaList(folderName,0)
