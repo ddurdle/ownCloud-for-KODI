@@ -85,14 +85,14 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     cleanURL = re.sub('---', '', url)
     cleanURL = re.sub('&', '---', cleanURL)
 
-    try:
-        fileID = unicode(package.file.id,'utf-8')
-    except:
-        fileID = package.file.id
-    try:
-        folderID = unicode(package.folder.id,'utf-8')
-    except:
-        folderID = package.folder.id
+#    try:
+#        fileID = unicode(package.file.id,'utf-8')
+#    except:
+    fileID = package.file.id
+#    try:
+#        folderID = unicode(package.folder.id,'utf-8')
+#    except:
+    folderID = package.folder.id
 #    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
     cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ fileID  + '&directory='+ folderID + '&filename='+ fileID +'&playback=0)', ))
 #    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))

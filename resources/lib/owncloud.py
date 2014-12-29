@@ -55,10 +55,7 @@ class owncloud(cloudservice):
     OWNCLOUD_V6 = 0
     OWNCLOUD_V7 = 1
 
-    FILE_URL = 'http://www.firedrive.com/file/'
-    DOWNLOAD_LINK = 'http://dl.firedrive.com/?alias='
-
-##
+    #
     # initialize (save addon, instance name, user agent)
     ##
     def __init__(self, PLUGIN_URL, addon, instanceName, user_agent):
@@ -261,9 +258,16 @@ class owncloud(cloudservice):
                 for q in re.finditer('data\-id\=\"([^\"]+)\".*?data\-file\=\"([^\"]+)\".*?data\-type\=\"([^\"]+)\".*?data\-mime\=\"([^\/]+)\/' ,entry, re.DOTALL):
                     fileID,fileName,contentType,fileType = q.groups()
 
-                    fileName = unicode(fileName, "unicode-escape")
+                    try:
+#                            fileName = unicode(fileName, "unicode-escape")
+                            fileName = fileName.decode('unicode-escape')
+                            fileName = fileName.encode('utf-8')
+                    except:
+                            pass
+
+                    #fileName = unicode(fileName, "unicode-escape")
                     # Undo any urlencoding before displaying the files (should also make the folders accessible)
-                    fileName = urllib.unquote(fileName)
+                    #fileName = urllib.unquote(fileName)
 
                     if fileType == 'video':
                         fileType = self.MEDIA_TYPE_VIDEO
@@ -276,15 +280,7 @@ class owncloud(cloudservice):
                     if contentType == 'dir':
                         mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                     else:
-                        try:
-                                _fileName = unicode(fileName,'utf-8')
-                        except:
-                                _fileName = fileName
-                        try:
-                                _folderName = unicode(folderName,'utf-8')
-                        except:
-                                _folderName = folderName
-                        thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+_folderName+ '/'+_fileName + '&x=50&y=50'+'|' + self.getHeadersEncoded()
+                        thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+folderName+ '/'+fileName + '&x=50&y=50'+'|' + self.getHeadersEncoded()
 
                         mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', thumbnail),folder.folder(folderName,folderName)) )
 
@@ -299,9 +295,15 @@ class owncloud(cloudservice):
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\".*?\"etag\"\:\"([^\"]+)\"' ,item, re.DOTALL):
                         fileID,fileName,fileType,contentType,etag = q.groups()
 
-                        fileName = unicode(fileName, "unicode-escape")
-                        # Undo any urlencoding before displaying the files (should also make the folders accessible)
-                        fileName = urllib.unquote(fileName)
+#                        fileName = unicode(fileName, "unicode-escape")
+                        try:
+#                            fileName = unicode(fileName, "unicode-escape")
+                            fileName = fileName.decode('unicode-escape')
+                            fileName = fileName.encode('utf-8')
+                        except:
+                            pass
+#                        # Undo any urlencoding before displaying the files (should also make the folders accessible)
+#                        fileName = urllib.unquote(fileName)
 
                         if fileType == 'video\\':
                             fileType = self.MEDIA_TYPE_VIDEO
@@ -314,16 +316,8 @@ class owncloud(cloudservice):
 
                             mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
                         else:
-                            try:
-                                _fileName = unicode(fileName,'utf-8')
-                            except:
-                                _fileName = fileName
-                            try:
-                                _folderName = unicode(folderName,'utf-8')
-                            except:
-                                _folderName = folderName
 
-                            thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+_folderName+ '/'+_fileName + '&c='+etag+'&x=50&y=50&forceIcon=0'+'|' + self.getHeadersEncoded()
+                            thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+folderName+ '/'+fileName + '&c='+etag+'&x=50&y=50&forceIcon=0'+'|' + self.getHeadersEncoded()
 
                             mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', thumbnail),folder.folder(folderName,folderName)) )
 
@@ -346,15 +340,15 @@ class owncloud(cloudservice):
     #   returns: url
     ##
     def getMediaCall(self, package):
-        try:
-            fileID =  unicode(package.file.id,'utf-8')
-        except:
-            fileID = package.file.id
+#        try:
+#            fileID =  unicode(package.file.id,'utf-8')
+#        except:
+        fileID = package.file.id
 
-        try:
-            folderID =  unicode(package.folder.id,'utf-8')
-        except:
-            folderID = package.folder.id
+#        try:
+#            folderID =  unicode(package.folder.id,'utf-8')
+#        except:
+        folderID = package.folder.id
 
 
 
@@ -376,9 +370,9 @@ class owncloud(cloudservice):
     def getDirectoryCall(self, folder):
 #                        videos[fileName] = {'url':  'plugin://plugin.video.owncloud?mode=folder&directory=' + urllib.quote_plus(folderName+'/'+fileName), 'mediaType': self.MEDIA_TYPE_FOLDER}
 
-        try:
-            return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + unicode(folder.id,'utf-8')
-        except:
+#        try:
+#            return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + unicode(folder.id,'utf-8')
+#        except:
             return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory=' + folder.id
 
 
