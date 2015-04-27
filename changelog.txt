@@ -1,4 +1,6 @@
 Version 0.4.5
+- add external storage support
+Version 0.4.5
 - fix for unicode (plugin may not work on non-UTF-8 systems)
 - Script failed on Kodi 14.0 Beta. #7
 - regression fixes for v6

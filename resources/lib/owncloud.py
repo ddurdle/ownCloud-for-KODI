@@ -100,6 +100,8 @@ class owncloud(cloudservice):
 
         self.authorization.setToken('auth_token',auth)
         self.authorization.setToken('auth_session',session)
+
+
         self.user_agent = user_agent
 
         #public playback only -- no authentication
@@ -139,9 +141,17 @@ class owncloud(cloudservice):
         requestToken = None
 
         #owncloud7
-        for r in re.finditer('name=\"(requesttoken)\" value\=\"([^\"]+)\"',
+        for r in re.finditer('name=\"requesttoken\" value\=\"([^\"]+)\"',
                              response_data, re.DOTALL):
-            requestTokenType,requestToken = r.groups()
+            requestToken = r.group(1)
+
+        if requestToken == None:
+            for r in re.finditer('data-requesttoken\=\"([^\"]+)\"',
+                                response_data, re.DOTALL):
+                requestToken = r.group(1)
+
+        if requestToken != '':
+            self.authorization.setToken('auth_requesttoken',requestToken)
 
         url = self.protocol + self.domain + '/index.php'
 
@@ -198,8 +208,10 @@ class owncloud(cloudservice):
     def getHeadersList(self):
         auth = self.authorization.getToken('auth_token')
         session = self.authorization.getToken('auth_session')
+        token = self.authorization.getToken('auth_requesttoken')
+
         if (auth != '' or session != ''):
-            return [('User-Agent', self.user_agent), ('Cookie', session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1')]
+            return [('User-Agent', self.user_agent), ('OCS-APIREQUEST', 'true'), ('requesttoken', token), ('Cookie', session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1')]
         else:
             return [('User-Agent', self.user_agent )]
 
@@ -231,7 +243,13 @@ class owncloud(cloudservice):
         if (self.version == self.OWNCLOUD_V6):
             url = self.protocol + self.domain +'/index.php/apps/files?' + urllib.urlencode({'dir' : folderName})
         else:
-            url = self.protocol + self.domain +'/index.php/apps/files/ajax/list.php?'+ urllib.urlencode({'dir' : folderName})+'&sort=name&sortdirection=asc'
+            if folderName == 'ES':
+                url = self.protocol + self.domain + '/ocs/v1.php/apps/files_external/api/v1/mounts?format=json'
+            elif folderName == 'SL':
+                url = self.protocol + self.domain + '/ocs/v1.php/apps/files_sharing/api/v1/shares?format=json&shared_with_me=false'
+            else:
+                url = self.protocol + self.domain +'/index.php/apps/files/ajax/list.php?'+ urllib.urlencode({'dir' : folderName})+'&sort=name&sortdirection=asc'
+
 
 
         # if action fails, validate login
@@ -239,6 +257,7 @@ class owncloud(cloudservice):
             response = opener.open(url)
         except urllib2.URLError, e:
             self.login()
+            opener.addheaders = self.getHeadersList()
 
             try:
                 response = opener.open(url)
@@ -292,18 +311,40 @@ class owncloud(cloudservice):
                 for s in re.finditer('\{.*?\}' ,entry, re.DOTALL):
                     item = s.group()
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"name\"\:\"([^\"]+)\".*?\"mimetype\"\:\"([^\/]+)\/.*?\"type\"\:\"([^\"]+)\".*?\"etag\"\:\"([^\"]+)\"' ,item, re.DOTALL):
-                        fileID,fileName,fileType,contentType,etag = q.groups()
+                    fileID = ''
+                    fileName = ''
+                    fileType = ''
+                    contentType = ''
+                    etag = ''
+                    thumbnail = ''
+                    if folderName == 'ES':
+                        for q in re.finditer('\"type\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            contentType = q.group(1)
+                            break
+                        for q in re.finditer('\"name\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            fileName = q.group(1)
+                            break
 
-#                        fileName = unicode(fileName, "unicode-escape")
-                        try:
-#                            fileName = unicode(fileName, "unicode-escape")
-                            fileName = fileName.decode('unicode-escape')
-                            fileName = fileName.encode('utf-8')
-                        except:
-                            pass
-#                        # Undo any urlencoding before displaying the files (should also make the folders accessible)
-#                        fileName = urllib.unquote(fileName)
+                    elif folderName == 'SL':
+                        for q in re.finditer('\"file_source\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            fileID = q.group(1)
+                            break
+
+                        for q in re.finditer('\"file_target\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            fileName = q.group(1)
+                            break
+                        for q in re.finditer('\"mimetype\"\:\"([^\/]+)\/' ,
+                                         item, re.DOTALL):
+                            fileType = q.group(1)
+                            break
+                        for q in re.finditer('\"item_type\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            contentType = q.group(1)
+                            break
 
                         if fileType == 'video\\':
                             fileType = self.MEDIA_TYPE_VIDEO
@@ -312,12 +353,51 @@ class owncloud(cloudservice):
                         elif fileType == 'image\\':
                             fileType = self.MEDIA_TYPE_PICTURE
 
-                        if contentType == 'dir':
+
+
+                    else:
+                        for q in re.finditer('\"id\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            fileID = q.group(1)
+                            break
+                        for q in re.finditer('\"name\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            fileName = q.group(1)
+                            break
+                        for q in re.finditer('\"mimetype\"\:\"([^\/]+)\/' ,
+                                         item, re.DOTALL):
+                            fileType = q.group(1)
+                            break
+                        for q in re.finditer('\"type\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            contentType = q.group(1)
+                            break
+                        for q in re.finditer('\"etag\"\:\"([^\"]+)\"' ,
+                                         item, re.DOTALL):
+                            etag = q.group(1)
+                            break
+                            thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+str(folderName)+ '/'+str(fileName) + '&c='+str(etag)+'&x=50&y=50&forceIcon=0'+'|' + self.getHeadersEncoded()
+
+                        if fileType == 'video\\':
+                            fileType = self.MEDIA_TYPE_VIDEO
+                        elif fileType == 'audio\\':
+                            fileType = self.MEDIA_TYPE_MUSIC
+                        elif fileType == 'image\\':
+                            fileType = self.MEDIA_TYPE_PICTURE
+
+#                        fileName = unicode(fileName, "unicode-escape")
+                    try:
+#                            fileName = unicode(fileName, "unicode-escape")
+                            fileName = fileName.decode('unicode-escape')
+                            fileName = fileName.encode('utf-8')
+                    except:
+                            pass
+#                        # Undo any urlencoding before displaying the files (should also make the folders accessible)
+#                        fileName = urllib.unquote(fileName)
+                    if contentType == 'dir':
 
                             mediaFiles.append(package.package(0,folder.folder(folderName+'/'+fileName,fileName)) )
-                        else:
-
-                            thumbnail = self.protocol + self.domain +'/index.php/core/preview.png?file='+folderName+ '/'+fileName + '&c='+etag+'&x=50&y=50&forceIcon=0'+'|' + self.getHeadersEncoded()
+                    else:
 
                             mediaFiles.append(package.package(file.file(fileName, fileName, fileName, fileType, '', thumbnail),folder.folder(folderName,folderName)) )
 

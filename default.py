@@ -212,10 +212,10 @@ if mode == 'main':
         pass
 
     if numberOfAccounts(PLUGIN_NAME) == 1 or instanceName != '' :
-        addMenu(PLUGIN_URL+'?mode=folder&directory=SY','<<Shared with you>>')
-        addMenu(PLUGIN_URL+'?mode=folder&directory=SO','<<Shared with others>>')
-        addMenu(PLUGIN_URL+'?mode=folder&directory=SL','<<Shared by link>>')
-        addMenu(PLUGIN_URL+'?mode=folder&directory=ES','<<External storage>>')
+#        addMenu(PLUGIN_URL+'?mode=folder&directory=SY','<<Shared with you>>')
+#        addMenu(PLUGIN_URL+'?mode=folder&directory=SO','<<Shared with others>>')
+#        addMenu(PLUGIN_URL+'?mode=folder&directory=SL','<<Shared by link>>')
+        addMenu(PLUGIN_URL+'?mode=folder&directory=ES','[External storage]')
 
 
 #dump a list of videos available to play
@@ -406,9 +406,9 @@ elif mode == 'video' or mode == 'audio':
     item.setInfo( type="Video", infoLabels={ "Title": filename , "Plot" : filename } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
-if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
-    addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
-    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
+#if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
+#    addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
+#    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
 
 
 
