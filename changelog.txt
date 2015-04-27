@@ -1,3 +1,4 @@
+- remove options
 Version 0.4.5
 - add external storage support
 Version 0.4.5
