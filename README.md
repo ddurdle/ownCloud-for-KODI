@@ -15,6 +15,8 @@ OwnCloud - v6 (no longer being developed)
 OwnCloud - v7
 	- http - local server (ownCloud 7)
 	- https - my.owndrive.com
+OwnCloud - v8
+	- https - demo.owncloud.org
 
 Session handling has been generalized to work on multiple server platforms, but may not work on your ownCloud installation.
 
@@ -59,7 +61,7 @@ See https://github.com/ddurdle/XBMC-ownCloud/wiki/-Add-on-API
 FAQ:
 
 1) Is there support for multiple accounts?
-Not at this time
+Yes, up to 10 accounts
 
 2) Does thie add-on support Pictures or other filetypes?
 Music and video files are supported; pictures/images or anyother file type is not.

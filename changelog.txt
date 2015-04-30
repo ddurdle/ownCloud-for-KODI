@@ -1,4 +1,6 @@
-- remove options
+Version 0.4.7
+- tested with OwnCloud v8
+- remove right-click-context "Watch ..."
 Version 0.4.5
 - add external storage support
 Version 0.4.5
