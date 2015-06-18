@@ -1,5 +1,5 @@
-XBMC-ownCloud
-=============
+ownCloud for KODI / XBMC
+========================
 
 An ownCloud Video/Music add-on for XBMC
 
