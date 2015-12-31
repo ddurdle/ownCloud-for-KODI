@@ -1,21 +1,23 @@
 ownCloud for KODI / XBMC
 ========================
 
-An ownCloud Video/Music add-on for XBMC
+An ownCloud Video/Music add-on for KODI / XBMC
 
 A video add-on for XBMC that enables playback of video and music files stored in a ownCloud account.
 
 - tested with ownCloud 6 (including Enterprise Edition)
-- tested with ownCloud 7
+- tested with ownCloud 7 (including Enterprise Edition)
+- tested with ownCloud 8 and 8.2
+
 
 - test servers (where I have tested)
 OwnCloud - v6 (no longer being developed)
 	- https - my.owndrive.com; cloudu.de (ownCloud 6)
 	- http - owncloud.arvixe.com (ownCloud 6 Enterprise Edition)
-OwnCloud - v7
+OwnCloud - v7 (no longer being developed)
 	- http - local server (ownCloud 7)
 	- https - my.owndrive.com
-OwnCloud - v8
+OwnCloud - v8.2
 	- https - demo.owncloud.org
 
 Session handling has been generalized to work on multiple server platforms, but may not work on your ownCloud installation.
