@@ -211,11 +211,11 @@ if mode == 'main':
     except:
         pass
 
-    if numberOfAccounts(PLUGIN_NAME) == 1 or instanceName != '' :
+    #if numberOfAccounts(PLUGIN_NAME) == 1 or instanceName != '' :
 #        addMenu(PLUGIN_URL+'?mode=folder&directory=SY','<<Shared with you>>')
 #        addMenu(PLUGIN_URL+'?mode=folder&directory=SO','<<Shared with others>>')
 #        addMenu(PLUGIN_URL+'?mode=folder&directory=SL','<<Shared by link>>')
-        addMenu(PLUGIN_URL+'?mode=folder&directory=ES','[External storage]')
+        #addMenu(PLUGIN_URL+'?mode=folder&directory=ES','[External storage]')
 
 
 #dump a list of videos available to play

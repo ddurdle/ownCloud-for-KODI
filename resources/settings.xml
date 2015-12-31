@@ -12,7 +12,7 @@
       	<setting id="owncloud1_protocol" type="enum" label="30007" visible="eq(-2,0)" values="HTTP|HTTPS" default="0" />
       	<setting id="owncloud1_username" type="text" label="30001" visible="eq(-3,0)" default="" />
     	<setting id="owncloud1_password" type="text" label="30002" visible="eq(-4,0)" option="hidden" default="" />
-     	<setting id="owncloud1_version" type="enum"       visible="eq(-5,0)" label="30010" values="6|7" default="0" />
+     	<setting id="owncloud1_version" type="enum"       visible="eq(-5,0)" label="30010" values="6|7|8.2" default="0" />
      	<setting id="owncloud1_auth" type="text"  visible="false" default="" />
      	<setting id="owncloud1_session" type="text"  visible="false" default="" />
         <setting id="owncloud1_prev_username" type="text"  visible="false" default="" />
@@ -21,7 +21,7 @@
         <setting id="owncloud2_protocol" type="enum" label="30007" visible="eq(-10,1)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud2_username" type="text" label="30001" visible="eq(-11,1)" default="" />
         <setting id="owncloud2_password" type="text" label="30002" visible="eq(-12,1)" option="hidden" default="" />
-        <setting id="owncloud2_version" type="enum"  label="30010" visible="eq(-13,1)" values="6|7" default="0" />
+        <setting id="owncloud2_version" type="enum"  label="30010" visible="eq(-13,1)" values="6|7|8.2" default="0" />
         <setting id="owncloud2_auth" type="text"  visible="false" default="" />
         <setting id="owncloud2_session" type="text"  visible="false" default="" />
         <setting id="owncloud2_prev_username" type="text"  visible="false" default="" />
@@ -31,7 +31,7 @@
         <setting id="owncloud3_protocol" type="enum" label="30007" visible="eq(-18,2)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud3_username" type="text" label="30001" visible="eq(-19,2)" default="" />
         <setting id="owncloud3_password" type="text" label="30002" visible="eq(-20,2)" option="hidden" default="" />
-        <setting id="owncloud3_version" type="enum"  label="30010" visible="eq(-21,2)" values="6|7" default="0" />
+        <setting id="owncloud3_version" type="enum"  label="30010" visible="eq(-21,2)" values="6|7|8.2" default="0" />
         <setting id="owncloud3_auth" type="text"  visible="false" default="" />
         <setting id="owncloud3_session" type="text"  visible="false" default="" />
         <setting id="owncloud3_prev_username" type="text"  visible="false" default="" />
@@ -41,7 +41,7 @@
         <setting id="owncloud4_protocol" type="enum" label="30007" visible="eq(-26,3)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud4_username" type="text" label="30001" visible="eq(-27,3)" default="" />
         <setting id="owncloud4_password" type="text" label="30002" visible="eq(-28,3)" option="hidden" default="" />
-        <setting id="owncloud4_version" type="enum"  label="30010" visible="eq(-29,3)" values="6|7" default="0" />
+        <setting id="owncloud4_version" type="enum"  label="30010" visible="eq(-29,3)" values="6|7|8.2" default="0" />
         <setting id="owncloud4_auth" type="text"  visible="false" default="" />
         <setting id="owncloud4_session" type="text"  visible="false" default="" />
         <setting id="owncloud4_prev_username" type="text"  visible="false" default="" />
@@ -51,7 +51,7 @@
         <setting id="owncloud5_protocol" type="enum" label="30007" visible="eq(-34,4)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud5_username" type="text" label="30001" visible="eq(-35,4)" default="" />
         <setting id="owncloud5_password" type="text" label="30002" visible="eq(-36,4)" option="hidden" default="" />
-        <setting id="owncloud5_version" type="enum"  label="30010" visible="eq(-37,4)" values="6|7" default="0" />
+        <setting id="owncloud5_version" type="enum"  label="30010" visible="eq(-37,4)" values="6|7|8.2" default="0" />
         <setting id="owncloud5_auth" type="text"  visible="false" default="" />
         <setting id="owncloud5_session" type="text"  visible="false" default="" />
         <setting id="owncloud5_prev_username" type="text"  visible="false" default="" />
@@ -61,7 +61,7 @@
         <setting id="owncloud6_protocol" type="enum" label="30007" visible="eq(-42,5)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud6_username" type="text" label="30001" visible="eq(-43,5)" default="" />
         <setting id="owncloud6_password" type="text" label="30002" visible="eq(-44,5)" option="hidden" default="" />
-        <setting id="owncloud6_version" type="enum"  label="30010" visible="eq(-45,5)" values="6|7" default="0" />
+        <setting id="owncloud6_version" type="enum"  label="30010" visible="eq(-45,5)" values="6|7|8.2" default="0" />
         <setting id="owncloud6_auth" type="text"  visible="false" default="" />
         <setting id="owncloud6_session" type="text"  visible="false" default="" />
         <setting id="owncloud6_prev_username" type="text"  visible="false" default="" />
@@ -71,7 +71,7 @@
         <setting id="owncloud7_protocol" type="enum" label="30007" visible="eq(-50,6)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud7_username" type="text" label="30001" visible="eq(-51,6)" default="" />
         <setting id="owncloud7_password" type="text" label="30002" visible="eq(-52,6)" option="hidden" default="" />
-        <setting id="owncloud7_version" type="enum"  label="30010" visible="eq(-53,6)" values="6|7" default="0" />
+        <setting id="owncloud7_version" type="enum"  label="30010" visible="eq(-53,6)" values="6|7|8.2" default="0" />
         <setting id="owncloud7_auth" type="text"  visible="false" default="" />
         <setting id="owncloud7_session" type="text"  visible="false" default="" />
         <setting id="owncloud7_prev_username" type="text"  visible="false" default="" />
@@ -81,7 +81,7 @@
         <setting id="owncloud8_protocol" type="enum" label="30007" visible="eq(-58,7)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud8_username" type="text" label="30001" visible="eq(-59,7)" default="" />
         <setting id="owncloud8_password" type="text" label="30002" visible="eq(-60,7)" option="hidden" default="" />
-        <setting id="owncloud8_version" type="enum"  label="30010" visible="eq(-61,7)" values="6|7" default="0" />
+        <setting id="owncloud8_version" type="enum"  label="30010" visible="eq(-61,7)" values="6|7|8.2" default="0" />
         <setting id="owncloud8_auth" type="text"  visible="false" default="" />
         <setting id="owncloud8_session" type="text"  visible="false" default="" />
         <setting id="owncloud8_prev_username" type="text"  visible="false" default="" />
@@ -92,7 +92,7 @@
         <setting id="owncloud9_protocol" type="enum" label="30007" visible="eq(-66,8)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud9_username" type="text" label="30001" visible="eq(-67,8)" default="" />
         <setting id="owncloud9_password" type="text" label="30002" visible="eq(-68,8)" option="hidden" default="" />
-        <setting id="owncloud9_version" type="enum"  label="30010" visible="eq(-69,8)" values="6|7" default="0" />
+        <setting id="owncloud9_version" type="enum"  label="30010" visible="eq(-69,8)" values="6|7|8.2" default="0" />
         <setting id="owncloud9_auth" type="text"  visible="false" default="" />
         <setting id="owncloud9_session" type="text"  visible="false" default="" />
         <setting id="owncloud9_prev_username" type="text"  visible="false" default="" />
@@ -101,7 +101,7 @@
         <setting id="owncloud10_protocol" type="enum" label="30007" visible="eq(-74,9)" values="HTTP|HTTPS" default="0" />
         <setting id="owncloud10_username" type="text" label="30001" visible="eq(-75,9)" default="" />
         <setting id="owncloud10_password" type="text" label="30002" visible="eq(-76,9)" option="hidden" default="" />
-        <setting id="owncloud10_version" type="enum"  label="30010" visible="eq(-77,9)" values="6|7" default="0" />
+        <setting id="owncloud10_version" type="enum"  label="30010" visible="eq(-77,9)" values="6|7|8.2" default="0" />
         <setting id="owncloud10_auth" type="text"  visible="false" default="" />
         <setting id="owncloud10_session" type="text"  visible="false" default="" />
         <setting id="owncloud10_prev_username" type="text"  visible="false" default="" />

@@ -1,6 +1,6 @@
 '''
     owncloud XBMC Plugin
-    Copyright (C) 2013-2014 ddurdle
+    Copyright (C) 2013-2016 ddurdle
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ class owncloud(cloudservice):
     CACHE_TYPE_AJAX = 2
     OWNCLOUD_V6 = 0
     OWNCLOUD_V7 = 1
+    OWNCLOUD_V82 = 2
 
     #
     # initialize (save addon, instance name, user agent)
@@ -140,6 +141,17 @@ class owncloud(cloudservice):
 
         requestToken = None
 
+#        for cookie in self.cookiejar:
+#            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+#                        str(cookie), re.DOTALL):
+#                cookieType,cookieValue = r.groups()
+#                if cookieType == 'oc_token':
+#                    self.authorization.setToken('auth_token',cookieValue)
+#                elif cookieType != 'oc_remember_login' and cookieType != 'oc_username':
+#                    self.authorization.setToken('auth_session',cookieType + '=' + cookieValue)
+#
+#        return
+
         #owncloud7
         for r in re.finditer('name=\"requesttoken\" value\=\"([^\"]+)\"',
                              response_data, re.DOTALL):
@@ -189,14 +201,28 @@ class owncloud(cloudservice):
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + 'login failed', xbmc.LOGERROR)
             return
 
-        for cookie in self.cookiejar:
-            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+        if (self.version == self.OWNCLOUD_V82):
+            sessionString = ''
+            for cookie in self.cookiejar:
+                for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
                         str(cookie), re.DOTALL):
-                cookieType,cookieValue = r.groups()
-                if cookieType == 'oc_token':
-                    self.authorization.setToken('auth_token',cookieValue)
-                elif cookieType != 'oc_remember_login' and cookieType != 'oc_username':
-                    self.authorization.setToken('auth_session',cookieType + '=' + cookieValue)
+                    cookieType,cookieValue = r.groups()
+                    if cookieType == 'oc_token':
+                        self.authorization.setToken('auth_token',cookieValue)
+                    elif cookieType != 'oc_remember_login' and cookieType != 'oc_username'  and cookieType != 'oc_token' and cookieType != 'oc_token':
+                        sessionString = str(sessionString) + str(cookieType) + '=' + str(cookieValue)+'; '
+            self.authorization.setToken('auth_session',sessionString)
+
+
+        else:
+            for cookie in self.cookiejar:
+                for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+                        str(cookie), re.DOTALL):
+                    cookieType,cookieValue = r.groups()
+                    if cookieType == 'oc_token':
+                        self.authorization.setToken('auth_token',cookieValue)
+                    elif cookieType != 'oc_remember_login' and cookieType != 'oc_username':
+                        self.authorization.setToken('auth_session',cookieType + '=' + cookieValue)
 
         return
 
@@ -210,10 +236,18 @@ class owncloud(cloudservice):
         session = self.authorization.getToken('auth_session')
         token = self.authorization.getToken('auth_requesttoken')
 
-        if (auth != '' or session != ''):
-            return [('User-Agent', self.user_agent), ('OCS-APIREQUEST', 'true'), ('requesttoken', token), ('Cookie', session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1')]
+        if (self.version == self.OWNCLOUD_V82):
+            if (auth != '' or session != ''):
+                return [('User-Agent', self.user_agent), ('Cookie', session)]
+            else:
+                return [('User-Agent', self.user_agent )]
+
         else:
-            return [('User-Agent', self.user_agent )]
+
+            if (auth != '' or session != ''):
+                return [('User-Agent', self.user_agent), ('OCS-APIREQUEST', 'true'), ('requesttoken', token), ('Cookie', session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1')]
+            else:
+                return [('User-Agent', self.user_agent )]
 
 
 
@@ -225,10 +259,18 @@ class owncloud(cloudservice):
         auth = self.authorization.getToken('auth_token')
         session = self.authorization.getToken('auth_session')
 
-        if (auth != '' or session != ''):
-            return urllib.urlencode({ 'User-Agent' : self.user_agent, 'Cookie' : session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1' })
+        if (self.version == self.OWNCLOUD_V82):
+            if (auth != '' or session != ''):
+                return urllib.urlencode({ 'User-Agent' : self.user_agent, 'Cookie' : session })
+            else:
+                return urllib.urlencode({ 'User-Agent' : self.user_agent })
+
         else:
-            return urllib.urlencode({ 'User-Agent' : self.user_agent })
+
+            if (auth != '' or session != ''):
+                return urllib.urlencode({ 'User-Agent' : self.user_agent, 'Cookie' : session+'; oc_username='+self.authorization.username+'; oc_token='+auth+'; oc_remember_login=1' })
+            else:
+                return urllib.urlencode({ 'User-Agent' : self.user_agent })
 
     ##
     # retrieve a list of videos, using playback type stream
