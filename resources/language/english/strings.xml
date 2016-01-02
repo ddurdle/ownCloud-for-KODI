@@ -47,4 +47,7 @@
     <string id="30046">Watch Stream</string>
     <string id="30047">Download and Watch</string>
     <string id="30048">Watch AJAX Stream</string>
+
+    <string id="30050">Self-signed SSL</string>
+
 </strings>

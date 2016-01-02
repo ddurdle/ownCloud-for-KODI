@@ -65,6 +65,13 @@ class owncloud(cloudservice):
         self.instanceName = instanceName
 
         try:
+            if self.addon.getSetting(self.instanceName+'_ssl') == 'true':
+                import ssl
+                ssl._create_default_https_context = ssl._create_unverified_context
+        except:
+            pass
+
+        try:
             username = self.addon.getSetting(self.instanceName+'_username')
         except:
             username = ''

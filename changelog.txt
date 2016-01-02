@@ -1,3 +1,6 @@
+Version 0.4.9
+- testing fix: Self-signed certificates don't work. #16
+- testing fix: login information incorrect or permission is denied #15
 Version 0.4.8
 - updated for OwnCloud v8.2 (must select 8.2 in Settings for account)
 Version 0.4.7
