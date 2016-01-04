@@ -1,3 +1,5 @@
+Version 0.4.10
+- implementation: Speed up with Session variables #11
 Version 0.4.9
 - testing fix: Self-signed certificates don't work. #16
 - testing fix: login information incorrect or permission is denied #15

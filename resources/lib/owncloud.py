@@ -239,9 +239,16 @@ class owncloud(cloudservice):
     #   returns: list containing the header
     ##
     def getHeadersList(self):
-        auth = self.authorization.getToken('auth_token')
-        session = self.authorization.getToken('auth_session')
-        token = self.authorization.getToken('auth_requesttoken')
+        try:
+            auth = self.authorization.getToken('auth_token')
+            session = self.authorization.getToken('auth_session')
+        except:
+            self.login()
+
+        try:
+            token = self.authorization.getToken('auth_requesttoken')
+        except:
+            token = ''
 
         if (self.version == self.OWNCLOUD_V82):
             if (auth != '' or session != ''):
@@ -263,8 +270,11 @@ class owncloud(cloudservice):
     #   returns: URL-encoded header string
     ##
     def getHeadersEncoded(self):
-        auth = self.authorization.getToken('auth_token')
-        session = self.authorization.getToken('auth_session')
+        try:
+            auth = self.authorization.getToken('auth_token')
+            session = self.authorization.getToken('auth_session')
+        except:
+            self.login()
 
         if (self.version == self.OWNCLOUD_V82):
             if (auth != '' or session != ''):
