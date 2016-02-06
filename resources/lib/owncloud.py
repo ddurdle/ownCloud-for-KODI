@@ -326,6 +326,22 @@ class owncloud(cloudservice):
         response_data = response.read()
         response.close()
 
+        for r in re.finditer('authentication_error' ,response_data, re.DOTALL):
+            self.login();
+            # if action fails, validate login
+            try:
+                response = opener.open(url)
+            except urllib2.URLError, e:
+                self.login()
+                opener.addheaders = self.getHeadersList()
+
+                try:
+                    response = opener.open(url)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    return
+            response_data = response.read()
+            response.close()
 
         mediaFiles = []
         # parsing page for files
