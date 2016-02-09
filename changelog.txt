@@ -1,11 +1,11 @@
 v0.4.11  (2016-02-06)
 - fix for session variable authentication_error
-Version 0.4.10
+v0.4.10
 - implementation: Speed up with Session variables #11
-Version 0.4.9
+v0.4.9
 - testing fix: Self-signed certificates don't work. #16
 - testing fix: login information incorrect or permission is denied #15
-Version 0.4.8
+v0.4.8
 - updated for OwnCloud v8.2 (must select 8.2 in Settings for account)
 Version 0.4.7
 - tested with OwnCloud v8
