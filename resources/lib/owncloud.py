@@ -203,7 +203,7 @@ class owncloud(cloudservice):
                              response_data, re.DOTALL):
             loginType,loginResult = r.groups()
 
-        if (loginResult == 0 or loginResult != self.authorization.username):
+        if (loginResult == 0 or loginResult.lower() != self.authorization.username.lower()):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30017))
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + 'login failed', xbmc.LOGERROR)
             return
