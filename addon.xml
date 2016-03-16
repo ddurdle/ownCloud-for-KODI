@@ -8,7 +8,7 @@
     </extension>
     <extension point="xbmc.addon.metadata">
         <summary>Plays video and music from your OwnCloud service</summary>
-        <description>Plays video and music from your OwnCloud service.  Supports/Tested on OwnCloud 6, 7, 8, and 8.2/8.2.2 (including Enterprise Edition)</description>
+        <description>Plays video and music from your OwnCloud service.  Supports/Tested on OwnCloud 6, 7, 8, and 8.2/8.2.2/9 (including Enterprise Edition)</description>
         <platform>all</platform>
     </extension>
 </addon>

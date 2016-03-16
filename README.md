@@ -7,7 +7,7 @@ A video add-on for XBMC that enables playback of video and music files stored in
 
 - tested with ownCloud 6 (including Enterprise Edition)
 - tested with ownCloud 7 (including Enterprise Edition)
-- tested with ownCloud 8 and 8.2
+- tested with ownCloud 8 / 8.2 / 9
 
 
 - test servers (where I have tested)
