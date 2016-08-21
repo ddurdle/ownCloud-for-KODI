@@ -1,7 +1,7 @@
 ownCloud for KODI / XBMC
 ========================
 
-An ownCloud Video/Music add-on for KODI / XBMC
+An ownCloud / NextCloud Video/Music add-on for KODI / XBMC
 
 A video add-on for XBMC that enables playback of video and music files stored in a ownCloud account.
 
